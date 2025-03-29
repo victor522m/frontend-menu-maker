@@ -100,6 +100,7 @@ function ManageMenus() {
 
       if (!response.ok) throw new Error('Error al eliminar menú');
       alert('Menú eliminado con éxito');
+      window.location.reload();
     } catch (error) {
       console.error('Error:', error);
     }
@@ -149,6 +150,9 @@ function ManageMenus() {
   };
 
   const handleRemovePlateFromMenu = async (menuId, plateId) => {
+    alert(`/api/menus/${menuId}/platos/${plateId}`);
+    console.log('menu.id:', menuId);
+    console.log('plate.id:', plateId);
     try {
       const response = await fetch(`/api/menus/${menuId}/platos/${plateId}`, {
         method: 'DELETE',
@@ -159,6 +163,8 @@ function ManageMenus() {
 
       if (!response.ok) throw new Error('Error al eliminar plato del menú');
       alert('Plato eliminado del menú con éxito');
+      window.location.reload();
+
     } catch (error) {
       console.error('Error:', error);
     }
@@ -178,6 +184,7 @@ function ManageMenus() {
       const updatedMenu = { ...selectedMenu, nombre: newMenuName };
       await handleUpdateMenu(selectedMenu.id, updatedMenu);
       setNewMenuName('');
+      window.location.reload();
     } catch (error) {
       console.error('Error:', error);
     }

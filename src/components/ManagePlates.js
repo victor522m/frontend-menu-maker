@@ -16,7 +16,7 @@ function ManagePlates() {
     aptoCeliaco: false
   });
 
-  // useEffect para obtener platos (igual que antes)
+  // useEffect para obtener platos  
   useEffect(() => {
     const fetchPlates = async () => {
       try {
@@ -70,7 +70,6 @@ function ManagePlates() {
     });
   };
 
-  // En tu componente ManagePlates
 const handleFormChange = (e) => {
   const { name, value, type, checked } = e.target;
   
