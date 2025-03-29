@@ -29,17 +29,33 @@ function CreateMenu() {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label>Nombre del menú:</label>
-        <input type="text" name="nombre" value={menu.nombre} onChange={handleChange} />
-      </div>
-      <div>
-        <label>Descripción:</label>
-        <textarea name="descripcion" value={menu.descripcion} onChange={handleChange} />
-      </div>
-      <button type="submit">Crear Menú</button>
-    </form>
+    <form onSubmit={handleSubmit} className="menu-form">
+  <div className="form-group">
+    <label>Nombre del menú:</label>
+    <input
+      type="text"
+      name="nombre"
+      value={menu.nombre}
+      onChange={handleChange}
+      className="form-control"
+      placeholder="Introduce el nombre del menú"
+    />
+  </div>
+  <div className="form-group">
+    <label>Descripción:</label>
+    <textarea
+      name="descripcion"
+      value={menu.descripcion}
+      onChange={handleChange}
+      className="form-control"
+      placeholder="Describe el menú brevemente"
+    />
+  </div>
+  <button type="submit" className="submit-button">
+    Crear Menú
+  </button>
+</form>
+
   );
 }
 

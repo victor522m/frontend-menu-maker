@@ -83,6 +83,7 @@ function ManageMenus() {
 
       if (!response.ok) throw new Error('Error al actualizar menú');
       alert('Menú actualizado con éxito');
+      window.location.reload();
     } catch (error) {
       console.error('Error:', error);
     }
@@ -103,6 +104,30 @@ function ManageMenus() {
       console.error('Error:', error);
     }
   };
+  const handleGeneratePDF = async (menuId) => {
+    try {
+      const porcentajeIva = 10; // Puedes ajustar este valor según tus necesidades
+      const url = `/api/menus/pdf/${menuId}/${porcentajeIva}`;
+
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': localStorage.getItem('authToken'),
+        },
+      });
+
+      if (!response.ok) throw new Error('Error generando PDF');
+
+      // Descargar el PDF
+      const blob = await response.blob();
+      const pdfUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = pdfUrl;
+      link.download = `menu_${menuId}.pdf`;
+      link.click();
+    } catch (error) {
+      console.error('Error al generar PDF:', error);
+    }
+  };
 
   const handleAddPlateToMenu = async (menuId, plateId) => {
     try {
@@ -112,11 +137,12 @@ function ManageMenus() {
           'Content-Type': 'application/json',
           'Authorization': localStorage.getItem('authToken')
         },
-        body: JSON.stringify({ plateId })
+        body: JSON.stringify([plateId]),
       });
 
       if (!response.ok) throw new Error('Error al agregar plato al menú');
       alert('Plato agregado al menú con éxito');
+      window.location.reload();
     } catch (error) {
       console.error('Error:', error);
     }
@@ -163,10 +189,30 @@ function ManageMenus() {
       <ul>
         {menus.map(menu => (
           <li key={menu.id}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
             <h4 onClick={() => handleSelectMenu(menu)}>{menu.nombre}</h4>
-            <p>{menu.descripcion}</p>
-            <p>Precio: ${menu.precio}</p>
-
+            <p>Precio: ${parseFloat(menu.precioTotal).toFixed(2)}</p>
+            <p>Precio con IVA: ${parseFloat(menu.precioConIva).toFixed(2)}</p>
+            </div>
+            
+            <button
+              onClick={() => handleGeneratePDF(menu.id)}
+              style={{
+                textDecoration: 'none',
+                padding: '8px 15px',
+                background: '#4CAF50',
+                color: 'white',
+                borderRadius: '5px',
+                border: 'none',
+                cursor: 'pointer',
+                height: 'fit-content',
+                marginLeft: '15px'
+              }}
+            >
+              Generar PDF
+            </button>
+          </div>
             <button onClick={() => handleDeleteMenu(menu.id)}>
               Eliminar
             </button>

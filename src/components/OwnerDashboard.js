@@ -4,10 +4,18 @@ import CreateMenu from './CreateMenu';
 import CreatePlate from './CreatePlate';
 import ManageMenus from './ManageMenus';
 import ManagePlates from './ManagePlates';
-import GeneratePdf from './GeneratePdf';
-
+import '../css/styles.css';
 function OwnerDashboard() {
   const navigate = useNavigate();
+  const [username, setUsername] = useState('');
+
+  // Recuperar el nombre del usuario desde localStorage
+  useEffect(() => {
+    const storedUsername = localStorage.getItem('username');
+    if (storedUsername) {
+      setUsername(storedUsername);
+    }
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -24,6 +32,7 @@ function OwnerDashboard() {
       window.location.href = '/login'; // Forzar recarga y limpiar estado
     }
   };
+  
 
   return (
     <div style={{
@@ -39,7 +48,7 @@ function OwnerDashboard() {
         paddingBottom: '20px'
       }}>
         <h1 style={{ margin: 0, color: '#2c3e50', fontSize: '28px', fontWeight: '600' }}>
-          Bienvenido Empleado
+          Bienvenido  {username}
         </h1>
         <button
           onClick={handleLogout}
@@ -56,31 +65,24 @@ function OwnerDashboard() {
         </button>
       </div>
 
-      <h1 style={{ color: '#2c3e50', fontSize: '24px', marginBottom: '10px' }}>
+      <h1>
         Panel de Administración
       </h1>
 
-      <div style={{ marginBottom: '30px' }}>
-        <h2 style={{ color: '#4CAF50', fontSize: '20px', marginBottom: '10px' }}>
+      <div>
+        <h2>
           Gestión de Menús
         </h2>
         <CreateMenu />
         <ManageMenus />
       </div>
 
-      <div style={{ marginBottom: '30px' }}>
-        <h2 style={{ color: '#4CAF50', fontSize: '20px', marginBottom: '10px' }}>
+      <div>
+        <h2>
           Gestión de Platos
         </h2>
         <CreatePlate />
         <ManagePlates />
-      </div>
-
-      <div>
-        <h2 style={{ color: '#4CAF50', fontSize: '20px', marginBottom: '10px' }}>
-          Generación de PDF
-        </h2>
-        <GeneratePdf />
       </div>
     </div>
   );

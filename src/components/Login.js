@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import '../css/Login.css';
 
 function Login({ onLogin }) {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
@@ -39,6 +40,7 @@ function Login({ onLogin }) {
       
       localStorage.setItem('authToken', authHeader);
       localStorage.setItem('userRoles', JSON.stringify(userData.roles));
+      localStorage.setItem('username', userData.username);
       
       onLogin(userData.roles);
       navigate('/dashboard', { replace: true });
@@ -59,57 +61,17 @@ function Login({ onLogin }) {
   };
 
   return (
-    <div style={{ 
-      maxWidth: '800px', 
-      margin: '0 auto', 
-      padding: '20px',
-      minHeight: '100vh',
-      backgroundColor: '#f5f5f5'
-    }}>
-      <div style={{ 
-        backgroundColor: 'white', 
-        borderRadius: '10px', 
-        padding: '30px',
-        boxShadow: '0 2px 15px rgba(0,0,0,0.1)'
-      }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '30px',
-          borderBottom: '2px solid #eee',
-          paddingBottom: '20px'
-        }}>
-          <h1 style={{ 
-            margin: 0, 
-            color: '#2c3e50', 
-            fontSize: '28px',
-            fontWeight: '600'
-          }}>
-            Acceso al Sistema
-          </h1>
+    <div className="login-container">
+      <div className="login-box">
+        <div className="login-header">
+          <h1 className="login-title">Acceso al Sistema</h1>
         </div>
 
-        {error && (
-          <div style={{
-            backgroundColor: '#ff4444',
-            color: 'white',
-            padding: '15px',
-            borderRadius: '5px',
-            marginBottom: '20px'
-          }}>
-            {error}
-          </div>
-        )}
+        {error && <div className="error-message">{error}</div>}
 
-        <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
-          <div style={{ marginBottom: '25px' }}>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px', 
-              color: '#2c3e50',
-              fontWeight: '500'
-            }}>
+        <form onSubmit={handleSubmit} className="login-form">
+          <div className="form-group">
+            <label className="form-label" htmlFor="username">
               Usuario:
             </label>
             <input
@@ -121,25 +83,12 @@ function Login({ onLogin }) {
               placeholder="Introduce tu usuario"
               autoComplete="username"
               disabled={isLoading}
-              style={{
-                width: '100%',
-                padding: '12px 15px',
-                borderRadius: '5px',
-                border: '1px solid #ddd',
-                fontSize: '16px',
-                transition: 'border-color 0.3s',
-                boxSizing: 'border-box'
-              }}
+              className="form-input"
             />
           </div>
 
-          <div style={{ marginBottom: '30px' }}>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px', 
-              color: '#2c3e50',
-              fontWeight: '500'
-            }}>
+          <div className="form-group">
+            <label className="form-label" htmlFor="password">
               Contraseña:
             </label>
             <input
@@ -151,43 +100,22 @@ function Login({ onLogin }) {
               placeholder="Introduce tu contraseña"
               autoComplete="current-password"
               disabled={isLoading}
-              style={{
-                width: '100%',
-                padding: '12px 15px',
-                borderRadius: '5px',
-                border: '1px solid #ddd',
-                fontSize: '16px',
-                transition: 'border-color 0.3s',
-                boxSizing: 'border-box'
-              }}
+              className="form-input"
             />
           </div>
 
           <button 
             type="submit" 
             disabled={isLoading || !credentials.username || !credentials.password}
+            className="submit-button"
             style={{
-              width: '100%',
-              padding: '15px',
               backgroundColor: isLoading ? '#bdc3c7' : '#4CAF50',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'background-color 0.3s, transform 0.2s',
               ':hover': {
-                backgroundColor: isLoading ? null : '#45a049',
-                transform: isLoading ? null : 'translateY(-1px)'
+                backgroundColor: isLoading ? null : '#45a049'
               }
             }}
           >
-            {isLoading ? (
-              <span>Verificando...</span>
-            ) : (
-              <span>Ingresar</span>
-            )}
+            {isLoading ? 'Verificando...' : 'Ingresar'}
           </button>
         </form>
       </div>

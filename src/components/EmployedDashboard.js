@@ -4,6 +4,15 @@ import { useNavigate } from 'react-router-dom';
 function EmployedDashboard() {
   const [menus, setMenus] = useState([]);
   const navigate = useNavigate();
+  const [username, setUsername] = useState('');
+
+  // Recuperar el nombre del usuario desde localStorage
+  useEffect(() => {
+    const storedUsername = localStorage.getItem('username');
+    if (storedUsername) {
+      setUsername(storedUsername);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchMenus = async () => {
@@ -66,12 +75,12 @@ function EmployedDashboard() {
       window.location.href = '/login'; // Forzar recarga y limpiar estado
     }
   };
-  
+
 
   return (
     <div style={{ padding: '20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-        <h1>Bienvenido Empleado</h1>
+        <h1>Bienvenido Empleado {username}</h1>
         <button
           onClick={handleLogout}
           style={{
@@ -132,12 +141,12 @@ function EmployedDashboard() {
 
               {(() => {
                 const precioBase = menu.platos.reduce((total, plato) => total + plato.precio, 0);
-                const iva = precioBase * 0.21; // 21% de IVA
+                const iva = precioBase * 0.10; //si avanzo en este proyecto esto no lo puedo hardkorear
                 const precioTotal = precioBase + iva;
                 return (
                   <>
                     <p>Precio base: ${precioBase.toFixed(2)}</p>
-                    <p>IVA (21%): ${iva.toFixed(2)}</p>
+                    <p>IVA (10%): ${iva.toFixed(2)}</p>
                     <p>Precio total: ${precioTotal.toFixed(2)}</p>
                   </>
                 );
