@@ -306,7 +306,7 @@ const handleFormChange = (e) => {
               <div className="plate-info">
                 <h4>{plate.nombre}</h4>
                 <p>{plate.descripcion}</p>
-                <p>Precio: ${plate.precio}</p>
+                <p>Precio: {plate.precio} €</p>
                 {plate.tipo_plato === 'PRIMEROS' && (
                   <p>Vegetariano: {plate.esVegetariano ? 'Sí' : 'No'} | Tiempo: {plate.tiempoPreparacion} min</p>
                 )}

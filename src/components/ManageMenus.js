@@ -18,7 +18,7 @@ function ManageMenus() {
         });
 
         if (!response.ok) throw new Error('Error obteniendo menús');
-        
+
         const data = await response.json();
         setMenus(data);
       } catch (error) {
@@ -35,7 +35,7 @@ function ManageMenus() {
         });
 
         if (!response.ok) throw new Error('Error obteniendo platos');
-        
+
         const data = await response.json();
         setPlatos(data);
       } catch (error) {
@@ -58,7 +58,7 @@ function ManageMenus() {
           });
 
           if (!response.ok) throw new Error('Error obteniendo platos del menú');
-          
+
           const data = await response.json();
           setMenuPlates(data);
         } catch (error) {
@@ -197,30 +197,25 @@ function ManageMenus() {
         {menus.map(menu => (
           <li key={menu.id}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-            <h4 onClick={() => handleSelectMenu(menu)}>{menu.nombre}</h4>
-            <p>Precio: ${parseFloat(menu.precioTotal).toFixed(2)}</p>
-            <p>Precio con IVA: ${parseFloat(menu.precioConIva).toFixed(2)}</p>
+              <div>
+                <h4 onClick={() => handleSelectMenu(menu)} style={{ cursor: 'pointer' }}>
+                  {menu.nombre} <span style={{ fontSize: '0.8em', color: 'grey' }}>Editar</span>
+                </h4>
+
+                <p>Precio: {parseFloat(menu.precioTotal).toFixed(2)} €</p>
+                <p>Precio con IVA: {parseFloat(menu.precioConIva).toFixed(2)} €</p>
+              </div>
+
+              <button
+                onClick={() => handleGeneratePDF(menu.id)}
+                className="pdf-button"
+              >
+                Generar PDF
+              </button>
             </div>
-            
-            <button
-              onClick={() => handleGeneratePDF(menu.id)}
-              style={{
-                textDecoration: 'none',
-                padding: '8px 15px',
-                background: '#4CAF50',
-                color: 'white',
-                borderRadius: '5px',
-                border: 'none',
-                cursor: 'pointer',
-                height: 'fit-content',
-                marginLeft: '15px'
-              }}
+            <button onClick={() => handleDeleteMenu(menu.id)}
+              className="btn-delete"
             >
-              Generar PDF
-            </button>
-          </div>
-            <button onClick={() => handleDeleteMenu(menu.id)}>
               Eliminar
             </button>
 
@@ -251,10 +246,13 @@ function ManageMenus() {
                 <ul>
                   {menuPlates.map(plate => (
                     <li key={plate.id}>
-                      <span>{plate.nombre}</span>
-                      <button onClick={() => handleRemovePlateFromMenu(menu.id, plate.id)}>
+
+                      <button onClick={() => handleRemovePlateFromMenu(menu.id, plate.id)}
+                        className='btn-delete'
+                      >
                         Quitar
                       </button>
+                      <span>{plate.nombre}</span>
                     </li>
                   ))}
                 </ul>
