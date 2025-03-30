@@ -5,6 +5,7 @@ import CreatePlate from './CreatePlate';
 import ManageMenus from './ManageMenus';
 import ManagePlates from './ManagePlates';
 import '../css/styles.css';
+import api from '../services/api.js';
 function OwnerDashboard() {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
@@ -19,7 +20,7 @@ function OwnerDashboard() {
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/logout', {
+      await api.get('/api/logout', {
         method: 'POST',
         headers: {
           'Authorization': localStorage.getItem('authToken')

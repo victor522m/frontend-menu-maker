@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import api from '../services/api.js';
 
 function CreateMenu() {
   const [menu, setMenu] = useState({ nombre: '', descripcion: '', precio: 0 });
@@ -6,7 +7,7 @@ function CreateMenu() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/menus', {
+      const response =  await api.get('/api/menus', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-
+import api from '../services/api.js';
 function ManagePlates() {
-  const [plates, setPlates] = useState([]);
+  const [plates, setPlatos] = useState([]);
   const [editingPlateId, setEditingPlateId] = useState(null);
   const [editFormData, setEditFormData] = useState({
     nombre: '',
@@ -20,24 +20,20 @@ function ManagePlates() {
   useEffect(() => {
     const fetchPlates = async () => {
       try {
-        const response = await fetch('/api/platos', {
+        const response = await api.get('/api/platos', {
           headers: {
             'Authorization': localStorage.getItem('authToken')
           }
         });
 
-        if (!response.ok) throw new Error('Error obteniendo platos');
-        
-        const data = await response.json();
-        setPlates(data);
+        setPlatos(response.data); // Axios maneja la conversión a JSON automáticamente
       } catch (error) {
-        console.error('Error:', error);
+        console.error('Error obteniendo platos:', error);
       }
     };
 
     fetchPlates();
   }, []);
-
   const handleEditClick = (plate) => {
     setEditingPlateId(plate.id);
     setEditFormData({
@@ -70,92 +66,88 @@ function ManagePlates() {
     });
   };
 
-const handleFormChange = (e) => {
-  const { name, value, type, checked } = e.target;
-  
-  if (name === "tipo_plato") {
-    setEditFormData(prev => ({
-      ...prev,
-      [name]: value,
-      esVegetariano: false,
-      tiempoPreparacion: 10,
-      tipoCarne: "",
-      guarnicion: "",
-      tipoPostre: "",
-      aptoCeliaco: false
-    }));
-  } else {
-    setEditFormData(prev => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value
-    }));
+  const handleFormChange = (e) => {
+    const { name, value, type, checked } = e.target;
+
+    if (name === "tipo_plato") {
+      setEditFormData(prev => ({
+        ...prev,
+        [name]: value,
+        esVegetariano: false,
+        tiempoPreparacion: 10,
+        tipoCarne: "",
+        guarnicion: "",
+        tipoPostre: "",
+        aptoCeliaco: false
+      }));
+    } else {
+      setEditFormData(prev => ({
+        ...prev,
+        [name]: type === "checkbox" ? checked : value
+      }));
+    }
+  };
+
+const handleUpdatePlate = async (e, plateId) => {
+  e.preventDefault();
+  try {
+    const plateData = {
+      nombre: editFormData.nombre,
+      descripcion: editFormData.descripcion,
+      precio: parseFloat(editFormData.precio),
+      tipo_plato: editFormData.tipo_plato,
+      ...(editFormData.tipo_plato === 'PRIMEROS' && {
+        esVegetariano: editFormData.esVegetariano,
+        tiempoPreparacion: parseInt(editFormData.tiempoPreparacion)
+      }),
+      ...(editFormData.tipo_plato === 'SEGUNDOS' && {
+        tipoCarne: editFormData.tipoCarne,
+        guarnicion: editFormData.guarnicion
+      }),
+      ...(editFormData.tipo_plato === 'POSTRE' && {
+        tipoPostre: editFormData.tipoPostre,
+        aptoCeliaco: editFormData.aptoCeliaco
+      })
+    };
+
+    await api.put(`/api/platos/${plateId}`, plateData, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': localStorage.getItem('authToken')
+      }
+    });
+
+    // Actualizar lista de platos
+    const updatedPlates = plates.map(plate =>
+      plate.id === plateId ? { ...plate, ...plateData } : plate
+    );
+
+    setPlatos(updatedPlates);
+    setEditingPlateId(null);
+    alert('Plato actualizado con éxito');
+    window.location.reload();
+
+  } catch (error) {
+    console.error('Error:', error);
+    alert(error.message);
   }
 };
 
-  const handleUpdatePlate = async (e, plateId) => {
-    e.preventDefault();
-    try {
-      // Construir el objeto según el tipo de plato
-      const plateData = {
-        nombre: editFormData.nombre,
-        descripcion: editFormData.descripcion,
-        precio: parseFloat(editFormData.precio),
-        tipo_plato: editFormData.tipo_plato,
-        ...(editFormData.tipo_plato === 'PRIMEROS' && {
-          esVegetariano: editFormData.esVegetariano,
-          tiempoPreparacion: parseInt(editFormData.tiempoPreparacion)
-        }),
-        ...(editFormData.tipo_plato === 'SEGUNDOS' && {
-          tipoCarne: editFormData.tipoCarne,
-          guarnicion: editFormData.guarnicion
-        }),
-        ...(editFormData.tipo_plato === 'POSTRE' && {
-          tipoPostre: editFormData.tipoPostre,
-          aptoCeliaco: editFormData.aptoCeliaco
-        })
-      };
+const handleDeletePlate = async (plateId) => {
+  try {
+    await api.delete(`/api/platos/${plateId}`, {
+      headers: {
+        'Authorization': localStorage.getItem('authToken')
+      }
+    });
 
-      const response = await fetch(`/api/platos/${plateId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': localStorage.getItem('authToken')
-        },
-        body: JSON.stringify(plateData)
-      });
+    alert('Plato eliminado con éxito');
+    window.location.reload();
+  } catch (error) {
+    console.error('Error:', error);
+  }
+};
 
-      if (!response.ok) throw new Error('Error al actualizar plato');
-      
-      // Actualizar lista de platos
-      const updatedPlates = plates.map(plate => 
-        plate.id === plateId ? { ...plate, ...plateData } : plate
-      );
-      
-      setPlates(updatedPlates);
-      setEditingPlateId(null);
-      alert('Plato actualizado con éxito');
-      
-    } catch (error) {
-      console.error('Error:', error);
-      alert(error.message);
-    }
-  };
-
-  const handleDeletePlate = async (plateId) => {
-    try {
-      const response = await fetch(`/api/platos/${plateId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': localStorage.getItem('authToken')
-        }
-      });
-
-      if (!response.ok) throw new Error('Error al eliminar plato');
-      alert('Plato eliminado con éxito');
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
 
   return (
     <div className="plates-container">
@@ -316,15 +308,15 @@ const handleFormChange = (e) => {
                 {plate.tipo_plato === 'POSTRE' && (
                   <p>Tipo: {plate.tipoPostre} | Celiacos: {plate.aptoCeliaco ? 'Apto' : 'No apto'}</p>
                 )}
-                
+
                 <div className="plate-actions">
-                  <button 
+                  <button
                     onClick={() => handleEditClick(plate)}
                     className="btn-edit"
                   >
                     Editar
                   </button>
-                  <button 
+                  <button
                     onClick={() => handleDeletePlate(plate.id)}
                     className="btn-delete"
                   >

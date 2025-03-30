@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../services/api.js';
 
 function EmployedDashboard() {
   const [menus, setMenus] = useState([]);
@@ -17,20 +18,24 @@ function EmployedDashboard() {
   useEffect(() => {
     const fetchMenus = async () => {
       try {
-        const response = await fetch('/api/menus', {
+        const response = await api.get('/api/menus', {
           headers: {
             'Authorization': localStorage.getItem('authToken'),
           },
         });
-
-        if (!response.ok) throw new Error('Error obteniendo menús');
-
-        const data = await response.json();
-        setMenus(data);
+    
+        // Axios maneja automáticamente la conversión a JSON
+        setMenus(response.data);
       } catch (error) {
-        console.error('Error:', error);
+        console.error('Error obteniendo menús:', error);
+    
+        // Puedes imprimir detalles adicionales si la API devuelve un mensaje de error
+        if (error.response) {
+          console.error('Detalles del error:', error.response.data);
+        }
       }
     };
+    
 
     fetchMenus();
   }, []);
@@ -39,22 +44,22 @@ function EmployedDashboard() {
     try {
       const porcentajeIva = 10; // Puedes ajustar este valor según tus necesidades
       const url = `/api/menus/pdf/${menuId}/${porcentajeIva}`;
-
-      const response = await fetch(url, {
+  
+      const response = await api.get(url, {
         headers: {
           'Authorization': localStorage.getItem('authToken'),
         },
+        responseType: 'blob', // Importante para recibir archivos binarios
       });
-
-      if (!response.ok) throw new Error('Error generando PDF');
-
-      // Descargar el PDF
-      const blob = await response.blob();
-      const pdfUrl = window.URL.createObjectURL(blob);
+  
+      // Crear un enlace para descargar el PDF
+      const pdfUrl = window.URL.createObjectURL(response.data);
       const link = document.createElement('a');
       link.href = pdfUrl;
       link.download = `menu_${menuId}.pdf`;
       link.click();
+      window.URL.revokeObjectURL(pdfUrl); // Liberar memoria
+  
     } catch (error) {
       console.error('Error al generar PDF:', error);
     }
@@ -62,7 +67,7 @@ function EmployedDashboard() {
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/logout', {
+      await api.get('/api/logout', {
         method: 'POST',
         headers: {
           'Authorization': localStorage.getItem('authToken')
@@ -134,7 +139,7 @@ function EmployedDashboard() {
               <ul style={{ listStyle: 'none', padding: 0 }}>
                 {menu.platos.map((plato) => (
                   <li key={plato.id} style={{ marginBottom: '5px' }}>
-                    <span style={{ fontWeight: 'bold' }}>{plato.nombre}</span> - ${plato.precio} - {plato.descripcion}
+                    <span style={{ fontWeight: 'bold' }}>{plato.nombre}</span> - {plato.precio} € - {plato.descripcion}
                   </li>
                 ))}
               </ul>
@@ -145,9 +150,9 @@ function EmployedDashboard() {
                 const precioTotal = precioBase + iva;
                 return (
                   <>
-                    <p>Precio base: ${precioBase.toFixed(2)}</p>
-                    <p>IVA (10%): ${iva.toFixed(2)}</p>
-                    <p>Precio total: ${precioTotal.toFixed(2)}</p>
+                    <p>Precio base: {precioBase.toFixed(2)} €</p>
+                    <p>IVA (10%): {iva.toFixed(2)} €</p>
+                    <p>Precio total: {precioTotal.toFixed(2)} €</p>
                   </>
                 );
               })()}

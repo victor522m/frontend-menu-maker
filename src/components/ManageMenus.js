@@ -1,26 +1,21 @@
 import React, { useState, useEffect } from 'react';
+import api from '../services/api.js';
 
 function ManageMenus() {
   const [menus, setMenus] = useState([]);
   const [platos, setPlatos] = useState([]);
   const [selectedMenu, setSelectedMenu] = useState(null);
   const [selectedPlate, setSelectedPlate] = useState(null);
-  const [newMenuName, setNewMenuName] = useState('');
-  const [menuPlates, setMenuPlates] = useState([]); // Estado para platos del menú seleccionado
+  const [newMenuName, setNewMenuName] = useState('');  
+  const [menuPlates, setMenuPlates] = useState([]);
 
   useEffect(() => {
     const fetchMenus = async () => {
       try {
-        const response = await fetch('/api/menus', {
-          headers: {
-            'Authorization': localStorage.getItem('authToken')
-          }
+        const response = await api.get('/api/menus', {
+          headers: { 'Authorization': localStorage.getItem('authToken') }
         });
-
-        if (!response.ok) throw new Error('Error obteniendo menús');
-
-        const data = await response.json();
-        setMenus(data);
+        setMenus(response.data);
       } catch (error) {
         console.error('Error:', error);
       }
@@ -28,16 +23,10 @@ function ManageMenus() {
 
     const fetchPlates = async () => {
       try {
-        const response = await fetch('/api/platos', {
-          headers: {
-            'Authorization': localStorage.getItem('authToken')
-          }
+        const response = await api.get('/api/platos', {
+          headers: { 'Authorization': localStorage.getItem('authToken') }
         });
-
-        if (!response.ok) throw new Error('Error obteniendo platos');
-
-        const data = await response.json();
-        setPlatos(data);
+        setPlatos(response.data);
       } catch (error) {
         console.error('Error:', error);
       }
@@ -51,37 +40,26 @@ function ManageMenus() {
     if (selectedMenu) {
       const fetchMenuPlates = async () => {
         try {
-          const response = await fetch(`/api/menus/${selectedMenu.id}/platos`, {
-            headers: {
-              'Authorization': localStorage.getItem('authToken')
-            }
+          const response = await api.get(`/api/menus/${selectedMenu.id}/platos`, {
+            headers: { 'Authorization': localStorage.getItem('authToken') }
           });
-
-          if (!response.ok) throw new Error('Error obteniendo platos del menú');
-
-          const data = await response.json();
-          setMenuPlates(data);
+          setMenuPlates(response.data);
         } catch (error) {
           console.error('Error:', error);
         }
       };
-
       fetchMenuPlates();
     }
   }, [selectedMenu]);
 
   const handleUpdateMenu = async (menuId, updatedMenu) => {
     try {
-      const response = await fetch(`/api/menus/${menuId}`, {
-        method: 'PUT',
+      await api.put(`/api/menus/${menuId}`, updatedMenu, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': localStorage.getItem('authToken')
-        },
-        body: JSON.stringify(updatedMenu)
+        }
       });
-
-      if (!response.ok) throw new Error('Error al actualizar menú');
       alert('Menú actualizado con éxito');
       window.location.reload();
     } catch (error) {
@@ -91,35 +69,24 @@ function ManageMenus() {
 
   const handleDeleteMenu = async (menuId) => {
     try {
-      const response = await fetch(`/api/menus/${menuId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': localStorage.getItem('authToken')
-        }
+      await api.delete(`/api/menus/${menuId}`, {
+        headers: { 'Authorization': localStorage.getItem('authToken') }
       });
-
-      if (!response.ok) throw new Error('Error al eliminar menú');
       alert('Menú eliminado con éxito');
       window.location.reload();
     } catch (error) {
       console.error('Error:', error);
     }
   };
+
   const handleGeneratePDF = async (menuId) => {
     try {
-      const porcentajeIva = 10; // Puedes ajustar este valor según tus necesidades
-      const url = `/api/menus/pdf/${menuId}/${porcentajeIva}`;
-
-      const response = await fetch(url, {
-        headers: {
-          'Authorization': localStorage.getItem('authToken'),
-        },
+      const porcentajeIva = 10;
+      const response = await api.get(`/api/menus/pdf/${menuId}/${porcentajeIva}`, {
+        headers: { 'Authorization': localStorage.getItem('authToken') },
+        responseType: 'blob'
       });
-
-      if (!response.ok) throw new Error('Error generando PDF');
-
-      // Descargar el PDF
-      const blob = await response.blob();
+      const blob = new Blob([response.data], { type: 'application/pdf' });
       const pdfUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = pdfUrl;
@@ -132,16 +99,12 @@ function ManageMenus() {
 
   const handleAddPlateToMenu = async (menuId, plateId) => {
     try {
-      const response = await fetch(`/api/menus/${menuId}/platos`, {
-        method: 'POST',
+      await api.post(`/api/menus/${menuId}/platos`, [plateId], {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': localStorage.getItem('authToken')
-        },
-        body: JSON.stringify([plateId]),
+        }
       });
-
-      if (!response.ok) throw new Error('Error al agregar plato al menú');
       alert('Plato agregado al menú con éxito');
       window.location.reload();
     } catch (error) {
@@ -150,21 +113,23 @@ function ManageMenus() {
   };
 
   const handleRemovePlateFromMenu = async (menuId, plateId) => {
-    alert(`/api/menus/${menuId}/platos/${plateId}`);
-    console.log('menu.id:', menuId);
-    console.log('plate.id:', plateId);
     try {
-      const response = await fetch(`/api/menus/${menuId}/platos/${plateId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': localStorage.getItem('authToken')
-        }
+      await api.delete(`/api/menus/${menuId}/platos/${plateId}`, {
+        headers: { 'Authorization': localStorage.getItem('authToken') }
       });
-
-      if (!response.ok) throw new Error('Error al eliminar plato del menú');
       alert('Plato eliminado del menú con éxito');
       window.location.reload();
-
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+  
+  const handleUpdateMenuName = async () => {
+    if (!selectedMenu) return;
+    try {
+      await handleUpdateMenu(selectedMenu.id, { ...selectedMenu, nombre: newMenuName });
+      setNewMenuName('');
+      window.location.reload();
     } catch (error) {
       console.error('Error:', error);
     }
@@ -178,17 +143,7 @@ function ManageMenus() {
     setSelectedPlate(plate);
   };
 
-  const handleUpdateMenuName = async () => {
-    if (!selectedMenu) return;
-    try {
-      const updatedMenu = { ...selectedMenu, nombre: newMenuName };
-      await handleUpdateMenu(selectedMenu.id, updatedMenu);
-      setNewMenuName('');
-      window.location.reload();
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
+
 
   return (
     <div>

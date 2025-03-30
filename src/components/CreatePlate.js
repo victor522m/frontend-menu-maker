@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import api from '../services/api.js';
 function CreatePlate() {
   const [plate, setPlate] = useState({
     nombre: '',
@@ -38,7 +38,7 @@ function CreatePlate() {
         })
       };
 
-      const response = await fetch('/api/platos', {
+      const response = await api.get('/api/platos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -50,6 +50,7 @@ function CreatePlate() {
       if (!response.ok) throw new Error('Error al crear plato');
       alert('Plato creado con éxito');
       setPlate({...plate, nombre: '', descripcion: '', precio: 0}); // Reset parcial
+      window.location.reload();
     } catch (error) {
       console.error('Error:', error);
       alert(error.message);

@@ -1,5 +1,5 @@
 import React from 'react';
-
+import api from '../services/api.js';
 function GeneratePdf() {
   const [menuId, setMenuId] = React.useState('');
   const [porcentajeIva, setPorcentajeIva] = React.useState(21);
@@ -8,7 +8,7 @@ function GeneratePdf() {
     try {
       const url = `/api/menus/pdf/${menuId}/${porcentajeIva}`;
 
-      const response = await fetch(url, {
+      const response = await api.get(url, {
         headers: {
           'Authorization': localStorage.getItem('authToken'),
         },

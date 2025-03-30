@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../css/Login.css';
+import api from '../services/api.js';
 
 function Login({ onLogin }) {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
@@ -8,44 +9,44 @@ function Login({ onLogin }) {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setIsLoading(true);
-    setError('');
-    
+  
     try {
       if (!credentials.username || !credentials.password) {
         throw new Error('Por favor completa todos los campos');
       }
 
-      const authHeader = `Basic ${btoa(`${credentials.username}:${credentials.password}`)}`;
-      
-      const authCheck = await fetch('/api/menus', {
+  
+      // Codifica en base64 las credenciales para Basic Auth
+      const encodedCredentials = btoa(`${credentials.username}:${credentials.password}`);
+      const authHeader = `Basic ${encodedCredentials}`;
+  
+      // Realiza la solicitud al endpoint. Axios lanzará error si el status code no es 2xx.
+      /*const authCheck = await api.get('/api/menus', {
+        headers: { 'Authorization': authHeader }
+      });*/
+  
+  
+      // Solicita la información del usuario
+      const userResponse = await api.get('/api/user-info', {
         headers: { 'Authorization': authHeader }
       });
-
-      if (!authCheck.ok) {
-        throw new Error('Credenciales inválidas');
-      }
-
-      const userResponse = await fetch('/api/user-info', {
-        headers: { 'Authorization': authHeader }
-      });
-      
-      if (!userResponse.ok) {
-        throw new Error('Error al obtener información del usuario');
-      }
-
-      const userData = await userResponse.json();
-      
+  
+      // En Axios, la respuesta se encuentra en data
+      const userData = userResponse.data;
+  
+      // Guarda la información en localStorage
       localStorage.setItem('authToken', authHeader);
       localStorage.setItem('userRoles', JSON.stringify(userData.roles));
       localStorage.setItem('username', userData.username);
-      
+  
       onLogin(userData.roles);
       navigate('/dashboard', { replace: true });
-
+  
     } catch (error) {
+      // Muestra el error. 
       setError(error.message || 'Error de autenticación');
       console.error('Login error:', error);
     } finally {
