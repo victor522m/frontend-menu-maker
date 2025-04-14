@@ -2,50 +2,60 @@ import React, { useState } from 'react';
 import api from '../services/api.js';
 import { toast } from 'react-toastify';
 
-
-function CreateMenu() {
-  const [menu, setMenu] = useState({ nombre: '', descripcion: '', precio: 0 });
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Validación de campos
-    if (!menu.nombre || !menu.descripcion) {
-      toast.info('Por favor, completa todos los campos.');
-      return;
-    }
-
-    try {
-      const response = await api.post(
-        '/api/menus',
-        menu,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-          },
-        }
-      );
-
-      if (response.status < 200 || response.status >= 300) {
-        throw new Error('Error al crear menú');
-      }
-
-      toast.success('Menú creado con éxito');
-      setMenu({ nombre: '', descripcion: '', precio: 0 }); // Reiniciamos el formulario
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error('Hubo un problema al crear el menú. Por favor, intenta de nuevo.');
-    }
-  };
+function CreateMenu({ onMenuCreated }) {
+  const [menu, setMenu] = useState({ nombre: '', descripcion: '' });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setMenu((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: value
     }));
   };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!menu.nombre.trim() || !menu.descripcion.trim()) {
+      toast.info('Por favor, completa todos los campos obligatorios.');
+      return;
+    }
+
+    try {
+      const response = await api.post('/api/menus', menu, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+        }
+      });
+
+      if (response.status === 201) {
+        toast.success('Menú creado con éxito');
+        setMenu({ nombre: '', descripcion: '' });
+
+        // Recarga la lista de menús desde la API
+        // const nuevosMenus = await api.get('/api/menus', {
+        //   headers: {
+        //     'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        //   }
+        // });
+
+        if (onMenuCreated) {
+          const nuevosMenus = await api.get('/api/menus', {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            }
+          });
+          onMenuCreated(nuevosMenus.data); // Se lo mandamos al padre
+        }
+      }
+
+    } catch (error) {
+      console.error('Error al crear el menú:', error);
+      toast.error('Hubo un problema al crear el menú.');
+    }
+  };
+
 
   return (
     <form onSubmit={handleSubmit} className="menu-form">
@@ -60,6 +70,7 @@ function CreateMenu() {
           placeholder="Introduce el nombre del menú"
         />
       </div>
+
       <div className="form-group">
         <label>Descripción:</label>
         <textarea
@@ -70,6 +81,7 @@ function CreateMenu() {
           placeholder="Describe el menú brevemente"
         />
       </div>
+
       <button type="submit" className="submit-button">
         Crear Menú
       </button>

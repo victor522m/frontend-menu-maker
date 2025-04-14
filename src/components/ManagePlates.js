@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api.js';
+import CreatePlate from './CreatePlate';
+import { toast } from 'react-toastify';
 
 function ManagePlates() {
   const [plates, setPlatos] = useState([]);
@@ -16,7 +18,10 @@ function ManagePlates() {
     tipoPostre: '',
     aptoCeliaco: false
   });
-
+  const handlePlateCreated = (newPlate) => {
+    setPlatos((prevPlatos) => [...prevPlatos, newPlate]);
+  };
+  
   const fetchPlates = async () => {
     try {
       const response = await api.get('/api/platos', {
@@ -123,11 +128,11 @@ function ManagePlates() {
         )
       );
 
-      alert('Plato actualizado con éxito');
+      toast.success('Plato actualizado con éxito');
       setEditingPlateId(null); // Salimos del modo de edición
     } catch (error) {
       console.error('Error actualizando plato:', error);
-      alert(error.message);
+      toast.error(error.message);
     }
   };
 
@@ -142,8 +147,9 @@ function ManagePlates() {
       // Eliminamos el plato del estado sin necesidad de recargar
       setPlatos(prevPlates => prevPlates.filter(plate => plate.id !== plateId));
 
-      alert('Plato eliminado con éxito');
+      toast.success('Plato eliminado con éxito');
     } catch (error) {
+      toast.error(error);
       console.error('Error eliminando plato:', error);
     }
   };
@@ -160,7 +166,7 @@ function ManagePlates() {
   return (
     <div className="plates-container">
       <h3>Platos existentes:</h3>
-
+      <CreatePlate onPlateCreated={handlePlateCreated} />
       {/* Mostrar platos agrupados */}
       {Object.keys(groupedPlates).map(tipo => (
         <div key={tipo} className="plate-group">

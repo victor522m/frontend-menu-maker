@@ -1,22 +1,44 @@
 import React, { useState, useEffect } from 'react';
-//import { useNavigate } from 'react-router-dom';
-import CreateMenu from './CreateMenu';
-import CreatePlate from './CreatePlate';
+//import CreateMenu from './CreateMenu';
 import ManageMenus from './ManageMenus';
+//import CreatePlate from './CreatePlate';
 import ManagePlates from './ManagePlates';
 import '../css/styles.css';
 import api from '../services/api.js';
-function OwnerDashboard() {
-  //const navigate = useNavigate();
-  const [username, setUsername] = useState('');
 
-  // Recuperar el nombre del usuario desde localStorage
+function OwnerDashboard() {
+  const [username, setUsername] = useState('');
+  const [menus, setMenus] = useState([]); // Estado para los menús
+  const [plates, setPlates] = useState([]); // Estado para los platos
+
   useEffect(() => {
     const storedUsername = localStorage.getItem('username');
     if (storedUsername) {
       setUsername(storedUsername);
     }
-  }, []);
+
+    fetchData(); // Al cargar, obtenemos los datos iniciales
+  }, []); // Llamamos solo una vez cuando se carga el componente
+
+  const fetchData = async () => {
+    try {
+      const menuResponse = await api.get('/api/menus', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        }
+      });
+      setMenus(menuResponse.data);
+
+      const plateResponse = await api.get('/api/platos', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        }
+      });
+      setPlates(plateResponse.data);
+    } catch (error) {
+      console.error('Error al obtener datos:', error);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -33,23 +55,21 @@ function OwnerDashboard() {
       window.location.href = '/login'; // Forzar recarga y limpiar estado
     }
   };
-  
+
+  // Funciones de actualización cuando se crean menús o platos
+  const handleMenuCreated = async () => {
+    await fetchData(); // Actualizamos menús y platos
+  };
+
+  const handlePlateCreated = async () => {
+    await fetchData(); // Actualizamos menús y platos
+  };
 
   return (
-    <div style={{
-      padding: '20px',
-      backgroundColor: '#f5f5f5',
-      minHeight: '100vh'
-    }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        marginBottom: '20px',
-        borderBottom: '2px solid #eee',
-        paddingBottom: '20px'
-      }}>
+    <div style={{ padding: '20px', backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', borderBottom: '2px solid #eee', paddingBottom: '20px' }}>
         <h1 style={{ margin: 0, color: '#2c3e50', fontSize: '28px', fontWeight: '600' }}>
-          Bienvenido  {username}
+          Bienvenido {username}
         </h1>
         <button
           onClick={handleLogout}
@@ -66,27 +86,20 @@ function OwnerDashboard() {
         </button>
       </div>
 
-      <h1>
-        Panel de Administración
-      </h1>
+      <h1>Panel de Administración</h1>
 
       <div>
-        <h2>
-          Gestión de Menús
-        </h2>
-        <CreateMenu />
-        <ManageMenus />
+        <h2>Gestión de Menús</h2>
+        <ManageMenus menus={menus} onMenuCreated={handleMenuCreated} />
       </div>
 
       <div>
-        <h2>
-          Gestión de Platos
-        </h2>
-        <CreatePlate />
-        <ManagePlates />
+        <h2>Gestión de Platos</h2>
+        <ManagePlates plates={plates} onPlateCreated={handlePlateCreated} />
       </div>
     </div>
   );
 }
 
 export default OwnerDashboard;
+

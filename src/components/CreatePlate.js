@@ -15,9 +15,8 @@ const initialPlate = {
   aptoCeliaco: false
 };
 
-function CreatePlate() {
+function CreatePlate({ onPlateCreated }) {
   const [plate, setPlate] = useState(initialPlate);
-  const [plates, setPlates] = useState([]); // Estado para almacenar platos
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -25,20 +24,6 @@ function CreatePlate() {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
-  };
-
-  const fetchPlates = async () => {
-    try {
-      const response = await api.get('/api/platos', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-        }
-      });
-      setPlates(response.data); // Actualizar el estado con la lista de platos
-    } catch (error) {
-      console.error('Error al obtener platos:', error);
-      toast.error('Error al obtener platos');
-    }
   };
 
   const handleSubmit = async (e) => {
@@ -71,21 +56,17 @@ function CreatePlate() {
         }
       });
 
-      if (response.status < 200 || response.status >= 300) {
-        throw new Error('Error al crear plato');
+      if (response.status === 201) {
+        toast.success('Plato creado con éxito');
+        setPlate({ nombre: '', descripcion: '', precio: '' });
+
+        if (onPlateCreated) {
+          onPlateCreated(response.data); // Notificamos al padre
+        }
       }
-
-      toast.success('Plato creado con éxito');
-
-      // Actualizar la lista de platos después de la creación
-      fetchPlates();
-
-      // Resetear el formulario
-      setPlate(initialPlate);
-
     } catch (error) {
-      console.error('Error:', error);
-      toast.error(error.message);
+      console.error('Error al crear el plato:', error);
+      toast.error('No se pudo crear el plato.');
     }
   };
 
