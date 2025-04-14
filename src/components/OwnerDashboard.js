@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+//import { useNavigate } from 'react-router-dom';
 import CreateMenu from './CreateMenu';
 import CreatePlate from './CreatePlate';
 import ManageMenus from './ManageMenus';
@@ -7,7 +7,7 @@ import ManagePlates from './ManagePlates';
 import '../css/styles.css';
 import api from '../services/api.js';
 function OwnerDashboard() {
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
   const [username, setUsername] = useState('');
 
   // Recuperar el nombre del usuario desde localStorage

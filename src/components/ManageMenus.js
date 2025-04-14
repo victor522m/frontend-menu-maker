@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api.js';
+import { toast } from 'react-toastify';
+
 
 function ManageMenus() {
   const [menus, setMenus] = useState([]);
   const [platos, setPlatos] = useState([]);
   const [selectedMenu, setSelectedMenu] = useState(null);
   const [selectedPlate, setSelectedPlate] = useState(null);
-  const [newMenuName, setNewMenuName] = useState('');  
+  const [newMenuName, setNewMenuName] = useState('');
   const [menuPlates, setMenuPlates] = useState([]);
 
   useEffect(() => {
@@ -26,9 +28,9 @@ function ManageMenus() {
         const response = await api.get('/api/platos', {
           headers: { 'Authorization': localStorage.getItem('authToken') }
         });
-        setPlatos(response.data);
+        setPlatos(response.data); // Actualiza el estado con los datos obtenidos
       } catch (error) {
-        console.error('Error:', error);
+        console.error('Error obteniendo platos:', error);
       }
     };
 
@@ -54,16 +56,20 @@ function ManageMenus() {
 
   const handleUpdateMenu = async (menuId, updatedMenu) => {
     try {
-      await api.put(`/api/menus/${menuId}`, updatedMenu, {
+      const response = await api.put(`/api/menus/${menuId}`, updatedMenu, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': localStorage.getItem('authToken')
         }
       });
-      alert('Menú actualizado con éxito');
-      window.location.reload();
+      toast.success('Menú actualizado con éxito');
+      setMenus(prev =>
+        prev.map(menu => (menu.id === menuId ? response.data : menu))
+      );
+      setSelectedMenu(response.data);
     } catch (error) {
       console.error('Error:', error);
+      toast.error('Error al actualizar el menú');
     }
   };
 
@@ -72,10 +78,15 @@ function ManageMenus() {
       await api.delete(`/api/menus/${menuId}`, {
         headers: { 'Authorization': localStorage.getItem('authToken') }
       });
-      alert('Menú eliminado con éxito');
-      window.location.reload();
+      toast.success('Menú eliminado con éxito');
+      setMenus(prev => prev.filter(menu => menu.id !== menuId));
+      if (selectedMenu?.id === menuId) {
+        setSelectedMenu(null);
+        setMenuPlates([]);
+      }
     } catch (error) {
       console.error('Error:', error);
+      toast.error('Error al eliminar el menú');
     }
   };
 
@@ -105,10 +116,14 @@ function ManageMenus() {
           'Authorization': localStorage.getItem('authToken')
         }
       });
-      alert('Plato agregado al menú con éxito');
-      window.location.reload();
+      toast.success('Plato agregado al menú con éxito');
+      const updatedMenuPlates = await api.get(`/api/menus/${menuId}/platos`, {
+        headers: { 'Authorization': localStorage.getItem('authToken') }
+      });
+      setMenuPlates(updatedMenuPlates.data); // Refresca los platos del menú
     } catch (error) {
       console.error('Error:', error);
+      toast.error('Error al agregar plato al menú');
     }
   };
 
@@ -117,21 +132,32 @@ function ManageMenus() {
       await api.delete(`/api/menus/${menuId}/platos/${plateId}`, {
         headers: { 'Authorization': localStorage.getItem('authToken') }
       });
-      alert('Plato eliminado del menú con éxito');
-      window.location.reload();
+      toast.success('Plato eliminado del menú con éxito');
+      const updatedMenuPlates = await api.get(`/api/menus/${menuId}/platos`, {
+        headers: { 'Authorization': localStorage.getItem('authToken') }
+      });
+      setMenuPlates(updatedMenuPlates.data); // Refresca los platos del menú
     } catch (error) {
       console.error('Error:', error);
+      toast.error('Error al eliminar el plato del menú');
     }
   };
-  
+
   const handleUpdateMenuName = async () => {
     if (!selectedMenu) return;
     try {
-      await handleUpdateMenu(selectedMenu.id, { ...selectedMenu, nombre: newMenuName });
+      const updated = { ...selectedMenu, nombre: newMenuName };
+      await handleUpdateMenu(selectedMenu.id, updated);
       setNewMenuName('');
-      window.location.reload();
+      // Actualizar `menus` con el nuevo nombre
+      setMenus(prev =>
+        prev.map(menu => menu.id === selectedMenu.id ? { ...menu, nombre: newMenuName } : menu)
+      );
+      // También actualizamos el menú seleccionado por si está visible
+      setSelectedMenu(prev => prev && prev.id === selectedMenu.id ? { ...prev, nombre: newMenuName } : prev);
     } catch (error) {
       console.error('Error:', error);
+      toast.error('Error al actualizar el nombre del menú');
     }
   };
 
@@ -142,6 +168,7 @@ function ManageMenus() {
   const handleSelectPlate = (plate) => {
     setSelectedPlate(plate);
   };
+
 
 
 
@@ -168,6 +195,13 @@ function ManageMenus() {
                 Generar PDF
               </button>
             </div>
+
+            <button 
+              onClick={() => handleSelectMenu(menu)}
+              className='btn-edit'
+            >
+              Editar
+            </button>
             <button onClick={() => handleDeleteMenu(menu.id)}
               className="btn-delete"
             >
@@ -182,8 +216,11 @@ function ManageMenus() {
                   onChange={(e) => setNewMenuName(e.target.value)}
                   placeholder="Nuevo nombre del menú"
                 />
-                <button onClick={handleUpdateMenuName}>
-                  Actualizar nombre
+                <button 
+                  onClick={handleUpdateMenuName}
+                  disabled={!newMenuName.trim()}
+                >
+                    Actualizar nombre
                 </button>
 
                 <select value={selectedPlate?.id || ''} onChange={(e) => handleSelectPlate(platos.find(p => p.id === parseInt(e.target.value)))}>
@@ -193,9 +230,13 @@ function ManageMenus() {
                   ))}
                 </select>
 
-                <button onClick={() => handleAddPlateToMenu(menu.id, selectedPlate?.id)}>
+                <button
+                  onClick={() => handleAddPlateToMenu(menu.id, selectedPlate?.id)}
+                  disabled={!selectedPlate?.id}
+                >
                   Agregar plato
                 </button>
+
 
                 <h4>Platos del menú:</h4>
                 <ul>

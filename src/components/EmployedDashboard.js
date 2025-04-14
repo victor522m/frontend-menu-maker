@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+//import { useNavigate } from 'react-router-dom';
 import api from '../services/api.js';
 
 function EmployedDashboard() {
   const [menus, setMenus] = useState([]);
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
   const [username, setUsername] = useState('');
 
   // Recuperar el nombre del usuario desde localStorage

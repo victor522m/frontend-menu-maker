@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import api from '../services/api.js';
+import { toast } from 'react-toastify';
+
 
 function CreateMenu() {
   const [menu, setMenu] = useState({ nombre: '', descripcion: '', precio: 0 });
@@ -9,7 +11,7 @@ function CreateMenu() {
 
     // Validación de campos
     if (!menu.nombre || !menu.descripcion) {
-      alert('Por favor, completa todos los campos.');
+      toast.info('Por favor, completa todos los campos.');
       return;
     }
 
@@ -29,11 +31,11 @@ function CreateMenu() {
         throw new Error('Error al crear menú');
       }
 
-      alert('Menú creado con éxito');
+      toast.success('Menú creado con éxito');
       setMenu({ nombre: '', descripcion: '', precio: 0 }); // Reiniciamos el formulario
     } catch (error) {
       console.error('Error:', error);
-      alert('Hubo un problema al crear el menú. Por favor, intenta de nuevo.');
+      toast.error('Hubo un problema al crear el menú. Por favor, intenta de nuevo.');
     }
   };
 
