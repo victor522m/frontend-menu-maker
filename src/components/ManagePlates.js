@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api.js';
+
 function ManagePlates() {
   const [plates, setPlatos] = useState([]);
   const [editingPlateId, setEditingPlateId] = useState(null);
@@ -16,24 +17,23 @@ function ManagePlates() {
     aptoCeliaco: false
   });
 
-  // useEffect para obtener platos  
+  const fetchPlates = async () => {
+    try {
+      const response = await api.get('/api/platos', {
+        headers: {
+          'Authorization': localStorage.getItem('authToken')
+        }
+      });
+      setPlatos(response.data); // Actualiza el estado con los datos obtenidos
+    } catch (error) {
+      console.error('Error obteniendo platos:', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchPlates = async () => {
-      try {
-        const response = await api.get('/api/platos', {
-          headers: {
-            'Authorization': localStorage.getItem('authToken')
-          }
-        });
-
-        setPlatos(response.data); // Axios maneja la conversión a JSON automáticamente
-      } catch (error) {
-        console.error('Error obteniendo platos:', error);
-      }
-    };
-
     fetchPlates();
   }, []);
+
   const handleEditClick = (plate) => {
     setEditingPlateId(plate.id);
     setEditFormData({
@@ -68,7 +68,6 @@ function ManagePlates() {
 
   const handleFormChange = (e) => {
     const { name, value, type, checked } = e.target;
-
     if (name === "tipo_plato") {
       setEditFormData(prev => ({
         ...prev,
@@ -88,246 +87,198 @@ function ManagePlates() {
     }
   };
 
-const handleUpdatePlate = async (e, plateId) => {
-  e.preventDefault();
-  try {
-    const plateData = {
-      nombre: editFormData.nombre,
-      descripcion: editFormData.descripcion,
-      precio: parseFloat(editFormData.precio),
-      tipo_plato: editFormData.tipo_plato,
-      ...(editFormData.tipo_plato === 'PRIMEROS' && {
-        esVegetariano: editFormData.esVegetariano,
-        tiempoPreparacion: parseInt(editFormData.tiempoPreparacion)
-      }),
-      ...(editFormData.tipo_plato === 'SEGUNDOS' && {
-        tipoCarne: editFormData.tipoCarne,
-        guarnicion: editFormData.guarnicion
-      }),
-      ...(editFormData.tipo_plato === 'POSTRE' && {
-        tipoPostre: editFormData.tipoPostre,
-        aptoCeliaco: editFormData.aptoCeliaco
-      })
-    };
+  const handleUpdatePlate = async (e, plateId) => {
+    e.preventDefault();
+    try {
+      const plateData = {
+        nombre: editFormData.nombre,
+        descripcion: editFormData.descripcion,
+        precio: parseFloat(editFormData.precio),
+        tipo_plato: editFormData.tipo_plato,
+        ...(editFormData.tipo_plato === 'PRIMEROS' && {
+          esVegetariano: editFormData.esVegetariano,
+          tiempoPreparacion: parseInt(editFormData.tiempoPreparacion)
+        }),
+        ...(editFormData.tipo_plato === 'SEGUNDOS' && {
+          tipoCarne: editFormData.tipoCarne,
+          guarnicion: editFormData.guarnicion
+        }),
+        ...(editFormData.tipo_plato === 'POSTRE' && {
+          tipoPostre: editFormData.tipoPostre,
+          aptoCeliaco: editFormData.aptoCeliaco
+        })
+      };
 
-    await api.put(`/api/platos/${plateId}`, plateData, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': localStorage.getItem('authToken')
-      }
-    });
+      await api.put(`/api/platos/${plateId}`, plateData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': localStorage.getItem('authToken')
+        }
+      });
 
-    // Actualizar lista de platos
-    const updatedPlates = plates.map(plate =>
-      plate.id === plateId ? { ...plate, ...plateData } : plate
-    );
+      // Actualizamos el estado para reflejar los cambios en la UI sin necesidad de recargar
+      setPlatos(prevPlates => 
+        prevPlates.map(plate => 
+          plate.id === plateId ? { ...plate, ...plateData } : plate
+        )
+      );
 
-    setPlatos(updatedPlates);
-    setEditingPlateId(null);
-    alert('Plato actualizado con éxito');
-    window.location.reload();
+      alert('Plato actualizado con éxito');
+      setEditingPlateId(null); // Salimos del modo de edición
+    } catch (error) {
+      console.error('Error actualizando plato:', error);
+      alert(error.message);
+    }
+  };
 
-  } catch (error) {
-    console.error('Error:', error);
-    alert(error.message);
-  }
-};
+  const handleDeletePlate = async (plateId) => {
+    try {
+      await api.delete(`/api/platos/${plateId}`, {
+        headers: {
+          'Authorization': localStorage.getItem('authToken')
+        }
+      });
 
-const handleDeletePlate = async (plateId) => {
-  try {
-    await api.delete(`/api/platos/${plateId}`, {
-      headers: {
-        'Authorization': localStorage.getItem('authToken')
-      }
-    });
+      // Eliminamos el plato del estado sin necesidad de recargar
+      setPlatos(prevPlates => prevPlates.filter(plate => plate.id !== plateId));
 
-    alert('Plato eliminado con éxito');
-    window.location.reload();
-  } catch (error) {
-    console.error('Error:', error);
-  }
-};
+      alert('Plato eliminado con éxito');
+    } catch (error) {
+      console.error('Error eliminando plato:', error);
+    }
+  };
 
+  // Agrupar platos por tipo
+  const groupedPlates = plates.reduce((acc, plate) => {
+    if (!acc[plate.tipo_plato]) {
+      acc[plate.tipo_plato] = [];
+    }
+    acc[plate.tipo_plato].push(plate);
+    return acc;
+  }, {});
 
   return (
     <div className="plates-container">
       <h3>Platos existentes:</h3>
-      <ul className="plates-list">
-        {plates.map(plate => (
-          <li key={plate.id} className="plate-item">
-            {editingPlateId === plate.id ? (
-              <form onSubmit={(e) => handleUpdatePlate(e, plate.id)} className="edit-form">
-                <div className="form-group">
-                  <label>Tipo de Plato:</label>
-                  <select
-                    name="tipo_plato"
-                    value={editFormData.tipo_plato}
-                    onChange={handleFormChange}
-                    className="form-control"
-                    enabled // Opcional: evitar cambiar el tipo de plato
-                  >
-                    <option value="PRIMEROS">Primer plato</option>
-                    <option value="SEGUNDOS">Segundo plato</option>
-                    <option value="POSTRE">Postre</option>
-                  </select>
-                </div>
 
-                <div className="form-group">
-                  <label>Nombre:</label>
-                  <input
-                    type="text"
-                    name="nombre"
-                    value={editFormData.nombre}
-                    onChange={handleFormChange}
-                    className="form-control"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Descripción:</label>
-                  <textarea
-                    name="descripcion"
-                    value={editFormData.descripcion}
-                    onChange={handleFormChange}
-                    className="form-control"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Precio:</label>
-                  <input
-                    type="number"
-                    name="precio"
-                    value={editFormData.precio}
-                    onChange={handleFormChange}
-                    className="form-control"
-                    step="0.01"
-                  />
-                </div>
-
-                {/* Campos específicos del tipo de plato */}
-                {editFormData.tipo_plato === 'PRIMEROS' && (
-                  <div className="specific-fields">
+      {/* Mostrar platos agrupados */}
+      {Object.keys(groupedPlates).map(tipo => (
+        <div key={tipo} className="plate-group">
+          <h4>{tipo === 'PRIMEROS' ? 'Primeros platos' : tipo === 'SEGUNDOS' ? 'Segundos platos' : 'Postres'}</h4>
+          <ul className="plates-list">
+            {groupedPlates[tipo].map(plate => (
+              <li key={plate.id} className="plate-item">
+                {editingPlateId === plate.id ? (
+                  <form onSubmit={(e) => handleUpdatePlate(e, plate.id)} className="edit-form">
                     <div className="form-group">
-                      <label>
-                        <input
-                          type="checkbox"
-                          name="esVegetariano"
-                          checked={editFormData.esVegetariano}
-                          onChange={handleFormChange}
-                        /> Vegetariano
-                      </label>
-                    </div>
-
-                    <div className="form-group">
-                      <label>Tiempo preparación (min):</label>
-                      <input
-                        type="number"
-                        name="tiempoPreparacion"
-                        value={editFormData.tiempoPreparacion}
-                        onChange={handleFormChange}
-                        className="form-control"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {editFormData.tipo_plato === 'SEGUNDOS' && (
-                  <div className="specific-fields">
-                    <div className="form-group">
-                      <label>Tipo de Carne:</label>
-                      <input
-                        type="text"
-                        name="tipoCarne"
-                        value={editFormData.tipoCarne}
-                        onChange={handleFormChange}
-                        className="form-control"
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label>Guarnición:</label>
-                      <input
-                        type="text"
-                        name="guarnicion"
-                        value={editFormData.guarnicion}
-                        onChange={handleFormChange}
-                        className="form-control"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {editFormData.tipo_plato === 'POSTRE' && (
-                  <div className="specific-fields">
-                    <div className="form-group">
-                      <label>Tipo de Postre:</label>
-                      <select
-                        name="tipoPostre"
-                        value={editFormData.tipoPostre}
-                        onChange={handleFormChange}
-                        className="form-control"
-                      >
-                        <option value="">Seleccione tipo</option>
-                        <option value="Tarta">Tarta</option>
-                        <option value="Helado">Helado</option>
-                        <option value="Fruta">Fruta</option>
-                        <option value="Brownie">Brownie</option>
+                      <label>Tipo de Plato:</label>
+                      <select name="tipo_plato" value={editFormData.tipo_plato} onChange={handleFormChange} className="form-control">
+                        <option value="PRIMEROS">Primer plato</option>
+                        <option value="SEGUNDOS">Segundo plato</option>
+                        <option value="POSTRE">Postre</option>
                       </select>
                     </div>
 
                     <div className="form-group">
-                      <label>
-                        <input
-                          type="checkbox"
-                          name="aptoCeliaco"
-                          checked={editFormData.aptoCeliaco}
-                          onChange={handleFormChange}
-                        /> Apto para celíacos
-                      </label>
+                      <label>Nombre:</label>
+                      <input type="text" name="nombre" value={editFormData.nombre} onChange={handleFormChange} className="form-control" />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Descripción:</label>
+                      <textarea name="descripcion" value={editFormData.descripcion} onChange={handleFormChange} className="form-control"></textarea>
+                    </div>
+
+                    <div className="form-group">
+                      <label>Precio:</label>
+                      <input type="number" name="precio" value={editFormData.precio} step="0.01" onChange={handleFormChange} className="form-control" />
+                    </div>
+
+                    {/* Campos específicos del tipo de plato */}
+                    {editFormData.tipo_plato === 'PRIMEROS' && (
+                      <>
+                        <div className="form-group">
+                          <label>
+                            <input type="checkbox" name="esVegetariano" checked={editFormData.esVegetariano} onChange={handleFormChange} />
+                            Vegetariano
+                          </label>
+                        </div>
+
+                        <div className="form-group">
+                          <label>Tiempo preparación (min):</label>
+                          <input type="number" name="tiempoPreparacion" value={editFormData.tiempoPreparacion} onChange={handleFormChange} className="form-control" />
+                        </div>
+                      </>
+                    )}
+
+                    {editFormData.tipo_plato === 'SEGUNDOS' && (
+                      <>
+                        <div className="form-group">
+                          <label>Tipo de Carne:</label>
+                          <input type="text" name="tipoCarne" value={editFormData.tipoCarne} onChange={handleFormChange} className="form-control" />
+                        </div>
+
+                        <div className="form-group">
+                          <label>Guarnición:</label>
+                          <input type="text" name="guarnicion" value={editFormData.guarnicion} onChange={handleFormChange} className="form-control" />
+                        </div>
+                      </>
+                    )}
+
+                    {editFormData.tipo_plato === 'POSTRE' && (
+                      <>
+                        <div className="form-group">
+                          <label>Tipo de Postre:</label>
+                          <select name="tipoPostre" value={editFormData.tipoPostre} onChange={handleFormChange} className="form-control">
+                            <option value="">Seleccione tipo</option>
+                            <option value="Tarta">Tarta</option>
+                            <option value="Helado">Helado</option>
+                            <option value="Fruta">Fruta</option>
+                            <option value="Brownie">Brownie</option>
+                          </select>
+                        </div>
+
+                        <div className="form-group">
+                          <label>
+                            <input type="checkbox" name="aptoCeliaco" checked={editFormData.aptoCeliaco} onChange={handleFormChange} />
+                            Apto para celíacos
+                          </label>
+                        </div>
+                      </>
+                    )}
+
+                    <div className="form-actions">
+                      <button type="submit" className="btn-save">Guardar</button>
+                      <button type="button" onClick={handleCancelEdit} className="btn-cancel">Cancelar</button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="plate-info">
+                    <h5>{plate.nombre}</h5>
+                    <p>{plate.descripcion}</p>
+                    <p>Precio: {plate.precio} €</p>
+
+                    {plate.tipo_plato === 'PRIMEROS' && (
+                      <p>Vegetariano: {plate.esVegetariano ? 'Sí' : 'No'} | Tiempo: {plate.tiempoPreparacion} min</p>
+                    )}
+                    {plate.tipo_plato === 'SEGUNDOS' && (
+                      <p>Carne: {plate.tipoCarne} | Guarnición: {plate.guarnicion}</p>
+                    )}
+                    {plate.tipo_plato === 'POSTRE' && (
+                      <p>Tipo: {plate.tipoPostre} | Celiacos: {plate.aptoCeliaco ? 'Apto' : 'No apto'}</p>
+                    )}
+
+                    <div className="plate-actions">
+                      <button onClick={() => handleEditClick(plate)} className="btn-edit">Editar</button>
+                      <button onClick={() => handleDeletePlate(plate.id)} className="btn-delete">Eliminar</button>
                     </div>
                   </div>
                 )}
-
-                <div className="form-actions">
-                  <button type="submit" className="btn-save">Guardar</button>
-                  <button type="button" onClick={handleCancelEdit} className="btn-cancel">Cancelar</button>
-                </div>
-              </form>
-            ) : (
-              <div className="plate-info">
-                <h4>{plate.nombre}</h4>
-                <p>{plate.descripcion}</p>
-                <p>Precio: {plate.precio} €</p>
-                {plate.tipo_plato === 'PRIMEROS' && (
-                  <p>Vegetariano: {plate.esVegetariano ? 'Sí' : 'No'} | Tiempo: {plate.tiempoPreparacion} min</p>
-                )}
-                {plate.tipo_plato === 'SEGUNDOS' && (
-                  <p>Carne: {plate.tipoCarne} | Guarnición: {plate.guarnicion}</p>
-                )}
-                {plate.tipo_plato === 'POSTRE' && (
-                  <p>Tipo: {plate.tipoPostre} | Celiacos: {plate.aptoCeliaco ? 'Apto' : 'No apto'}</p>
-                )}
-
-                <div className="plate-actions">
-                  <button
-                    onClick={() => handleEditClick(plate)}
-                    className="btn-edit"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => handleDeletePlate(plate.id)}
-                    className="btn-delete"
-                  >
-                    Eliminar
-                  </button>
-                </div>
-              </div>
-            )}
-          </li>
-        ))}
-      </ul>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
     </div>
   );
 }

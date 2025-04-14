@@ -1,5 +1,19 @@
 import React, { useState } from 'react';
 import api from '../services/api.js';
+const initialPlate = {
+  nombre: '',
+  descripcion: '',
+  precio: 0,
+  tipo_plato: 'PRIMEROS',
+  esVegetariano: false,
+  tiempoPreparacion: 10,
+  tipoCarne: '',
+  guarnicion: '',
+  tipoPostre: '',
+  aptoCeliaco: false
+};
+//const [plate, setPlate] = useState(initialPlate);
+
 function CreatePlate() {
   const [plate, setPlate] = useState({
     nombre: '',
@@ -38,18 +52,20 @@ function CreatePlate() {
         })
       };
 
-      const response = await api.get('/api/platos', {
-        method: 'POST',
+      const response = await api.post('/api/platos', plateData, {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': localStorage.getItem('authToken')
-        },
-        body: JSON.stringify(plateData)
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        }
       });
+      
 
-      if (!response.ok) throw new Error('Error al crear plato');
+      if (response.status < 200 || response.status >= 300) {
+        throw new Error('Error al crear plato');
+      }
+      
       alert('Plato creado con éxito');
-      setPlate({...plate, nombre: '', descripcion: '', precio: 0}); // Reset parcial
+      setPlate(initialPlate); // Reset parcial
       window.location.reload();
     } catch (error) {
       console.error('Error:', error);
