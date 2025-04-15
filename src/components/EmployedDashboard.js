@@ -71,18 +71,20 @@ function EmployedDashboard() {
 const navigate = useNavigate();
 
 const handleLogout = async () => {
+  console.log('🔁 Ejecutando handleLogout...');
   try {
     const response = await api.post('/api/logout');
-    console.log('Logout exitoso:', response.status);
+    console.log('✅ Logout exitoso:', response.status);
   } catch (error) {
-    console.error('Error de logout:', error);
+    console.error('❌ Error al hacer logout:', error);
   } finally {
     localStorage.clear();
-    sessionStorage.clear(); // por si acaso
-    console.log('Token después de clear:', localStorage.getItem('authToken'));
-    navigate('/'); // asegúrate que redirige bien
+    sessionStorage.clear(); // Por si acaso se usa
+    console.log('🧹 authToken después de clear:', localStorage.getItem('authToken'));
+    navigate('/');
   }
 };
+
 
   
 
