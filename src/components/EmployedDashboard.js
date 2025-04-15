@@ -70,30 +70,19 @@ function EmployedDashboard() {
 // dentro del componente:
 const navigate = useNavigate();
 
-
-
-  const handleLogout = async () => {
-    try {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        console.warn('No se encontró el token de autenticación');
-        return;
-      }
-
-      await api.post('/api/logout', null, {
-        headers: {
-          'Authorization': token,
-        },
-      });
-
-      console.log('Logout exitoso');
-    } catch (error) {
-      console.error('Error de logout:', error);
-    } finally {
-      localStorage.clear();
-      navigate('/'); // Redirige al inicio (GitHub Pages: #/)
-    }
-  };
+const handleLogout = async () => {
+  try {
+    const response = await api.post('/api/logout');
+    console.log('Logout exitoso:', response.status);
+  } catch (error) {
+    console.error('Error de logout:', error);
+  } finally {
+    localStorage.clear();
+    sessionStorage.clear(); // por si acaso
+    console.log('Token después de clear:', localStorage.getItem('authToken'));
+    navigate('/'); // asegúrate que redirige bien
+  }
+};
 
   
 
