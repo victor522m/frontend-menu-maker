@@ -68,12 +68,9 @@ function EmployedDashboard() {
 
 
 // dentro del componente:
-const navigate = useNavigate();
-
 const handleLogout = async () => {
   try {
-    await api.post('/api/logout', {
-      method: 'POST',
+    await api.post('/api/logout', null, {
       headers: {
         'Authorization': localStorage.getItem('authToken')
       }
@@ -82,7 +79,7 @@ const handleLogout = async () => {
     console.error('Error de logout:', error);
   } finally {
     localStorage.clear();
-    navigate('/'); // redirige al login (si usas HashRouter, se adapta automáticamente)
+    navigate('/'); // esto llevará a https://victor522m.github.io/frontend-menu-maker/#/
   }
 };
 
