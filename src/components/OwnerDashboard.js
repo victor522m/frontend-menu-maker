@@ -61,7 +61,8 @@ const handleLogout = async () => {
     localStorage.clear();
     
     // Redirigir al login
-    window.location.href = '/frontend-menu-maker/#/';  // Redirige explícitamente al login
+    window.location.href = 'https://victor522m.github.io/frontend-menu-maker/#/';
+    // Redirige explícitamente al login
   }
 };
 
