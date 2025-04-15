@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-//import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api.js';
 
 function EmployedDashboard() {
@@ -65,21 +65,27 @@ function EmployedDashboard() {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await api.get('/api/logout', {
-        method: 'POST',
-        headers: {
-          'Authorization': localStorage.getItem('authToken')
-        }
-      });
-    } catch (error) {
-      console.error('Error de logout:', error);
-    } finally {
-      localStorage.clear();
-      window.location.href = '/login'; // Forzar recarga y limpiar estado
-    }
-  };
+
+
+// dentro del componente:
+const navigate = useNavigate();
+
+const handleLogout = async () => {
+  try {
+    await api.get('/api/logout', {
+      method: 'POST',
+      headers: {
+        'Authorization': localStorage.getItem('authToken')
+      }
+    });
+  } catch (error) {
+    console.error('Error de logout:', error);
+  } finally {
+    localStorage.clear();
+    navigate('/'); // redirige al login (si usas HashRouter, se adapta automáticamente)
+  }
+};
+
 
 
   return (

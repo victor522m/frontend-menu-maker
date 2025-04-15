@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 //import CreateMenu from './CreateMenu';
+import { useNavigate } from 'react-router-dom';
 import ManageMenus from './ManageMenus';
 //import CreatePlate from './CreatePlate';
 import ManagePlates from './ManagePlates';
@@ -40,21 +41,27 @@ function OwnerDashboard() {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await api.get('/api/logout', {
-        method: 'POST',
-        headers: {
-          'Authorization': localStorage.getItem('authToken')
-        }
-      });
-    } catch (error) {
-      console.error('Error de logout:', error);
-    } finally {
-      localStorage.clear();
-      window.location.href = '/login'; // Forzar recarga y limpiar estado
-    }
-  };
+
+
+// dentro del componente:
+const navigate = useNavigate();
+
+const handleLogout = async () => {
+  try {
+    await api.get('/api/logout', {
+      method: 'POST',
+      headers: {
+        'Authorization': localStorage.getItem('authToken')
+      }
+    });
+  } catch (error) {
+    console.error('Error de logout:', error);
+  } finally {
+    localStorage.clear();
+    navigate('/'); // redirige al login (si usas HashRouter, se adapta automáticamente)
+  }
+};
+
 
   // Funciones de actualización cuando se crean menús o platos
   const handleMenuCreated = async () => {
