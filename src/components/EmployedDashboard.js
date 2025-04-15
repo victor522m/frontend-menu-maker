@@ -68,6 +68,7 @@ function EmployedDashboard() {
 
 
 // dentro del componente:
+const navigate = useNavigate();
 const handleLogout = async () => {
   try {
     await api.post('/api/logout', null, {
