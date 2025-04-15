@@ -4,7 +4,7 @@ import Login from './components/Login';
 import OwnerDashboard from './components/OwnerDashboard';
 import EmployedDashboard from './components/EmployedDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
@@ -35,10 +35,11 @@ function App() {
 
           <Route path="/dashboard" element={
             <ProtectedRoute allowedRoles={['OWNER', 'EMPLOYED']}>
-              {userRole === 'OWNER' ?
-                <OwnerDashboard onLogout={handleLogout} /> :
+              {userRole === 'OWNER' ? (
+                <OwnerDashboard onLogout={handleLogout} />
+              ) : (
                 <EmployedDashboard onLogout={handleLogout} />
-              }
+              )}
             </ProtectedRoute>
           } />
 
@@ -47,20 +48,9 @@ function App() {
         </Routes>
       </HashRouter>
 
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
+      <ToastContainer position="top-right" autoClose={3000} />
     </>
   );
 }
 
 export default App;
-

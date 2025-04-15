@@ -71,17 +71,15 @@ function EmployedDashboard() {
 const navigate = useNavigate();
 
 const handleLogout = async () => {
-  console.log('🔁 Ejecutando handleLogout...');
   try {
-    const response = await api.post('/api/logout');
-    console.log('✅ Logout exitoso:', response.status);
+    await api.post('/api/logout');
+    toast.success('Sesión cerrada correctamente');
   } catch (error) {
-    console.error('❌ Error al hacer logout:', error);
+    toast.error('Error al cerrar sesión');
+    console.error('Logout error:', error);
   } finally {
     localStorage.clear();
-    sessionStorage.clear(); // Por si acaso se usa
-    console.log('🧹 authToken después de clear:', localStorage.getItem('authToken'));
-    navigate('/login');
+    onLogout(); // Esto hace que App.js reaccione y redirija a "/"
   }
 };
 
