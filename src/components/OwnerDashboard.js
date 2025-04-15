@@ -61,7 +61,7 @@ const handleLogout = async () => {
     localStorage.clear();
     
     // Redirigir al login
-    window.location.href = '/';  // Redirige explícitamente al login
+    window.location.href = '/frontend-menu-maker';  // Redirige explícitamente al login
   }
 };
 
