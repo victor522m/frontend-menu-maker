@@ -81,7 +81,7 @@ function Login({ onLogin }) {
               name="username"
               value={credentials.username}
               onChange={handleChange}
-              placeholder="Introduce tu usuario"
+              placeholder="Introduce tu usuario, user"
               autoComplete="username"
               disabled={isLoading}
               className="form-input"
@@ -98,7 +98,7 @@ function Login({ onLogin }) {
               name="password"
               value={credentials.password}
               onChange={handleChange}
-              placeholder="Introduce tu contraseña"
+              placeholder="Introduce tu contraseña, 123"
               autoComplete="current-password"
               disabled={isLoading}
               className="form-input"
