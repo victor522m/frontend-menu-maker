@@ -86,7 +86,8 @@ const handleLogout = async () => {
     
     // Redirigir al login
     //window.location.href = 'https://victor522m.github.io/frontend-menu-maker/#/';
-    window.location.href = 'https://www.google.com';
+    window.location.href = 'https://victor522m.github.io/frontend-menu-maker';
+
   // Redirige explícitamente al login
   }
 };
