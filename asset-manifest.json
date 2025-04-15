@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/frontend-menu-maker/static/css/main.a1c332ec.css",
+    "main.js": "/frontend-menu-maker/static/js/main.b1d34c25.js",
+    "index.html": "/frontend-menu-maker/index.html",
+    "main.a1c332ec.css.map": "/frontend-menu-maker/static/css/main.a1c332ec.css.map",
+    "main.b1d34c25.js.map": "/frontend-menu-maker/static/js/main.b1d34c25.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.a1c332ec.css",
+    "static/js/main.b1d34c25.js"
+  ]
+}
