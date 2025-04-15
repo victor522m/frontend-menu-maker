@@ -43,7 +43,7 @@
       "last 1 safari version"
     ]
   },
-  
+  "proxy": "https://menumaker-production-b6ac.up.railway.app", 
   "devDependencies": {
     "gh-pages": "^6.3.0"
   }
