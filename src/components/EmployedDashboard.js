@@ -81,7 +81,7 @@ const handleLogout = async () => {
     localStorage.clear();
     sessionStorage.clear(); // Por si acaso se usa
     console.log('🧹 authToken después de clear:', localStorage.getItem('authToken'));
-    navigate('/');
+    navigate('/login');
   }
 };
 
