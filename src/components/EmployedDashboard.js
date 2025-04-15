@@ -69,18 +69,43 @@ function EmployedDashboard() {
 
 // dentro del componente:
 const navigate = useNavigate();
+
 const handleLogout = async () => {
   try {
+    // Comprobar si hay un token de autenticación antes de enviar la solicitud
+    const authToken = localStorage.getItem('authToken');
+    if (!authToken) {
+      console.error('No hay token de autenticación. El usuario ya está desconectado.');
+      // En caso de que no haya token, no enviamos la solicitud y redirigimos de inmediato
+      navigate('/login');
+      return;
+    }
+
+    // Realizamos la solicitud de logout
     await api.post('/api/logout', null, {
       headers: {
-        'Authorization': localStorage.getItem('authToken')
+        'Authorization': authToken
       }
     });
+
+    // Si la solicitud fue exitosa, limpiamos el localStorage
+    localStorage.clear();
+    console.log('Logout exitoso. Redirigiendo...');
+
+    // Aquí podemos mostrar un mensaje de éxito usando 'toast' si lo deseas
+    toast.success("Has cerrado sesión exitosamente.");
+
+    // Redirigimos a la página de login o a la ruta deseada
+    navigate('/login'); // Asegúrate de que sea la ruta correcta después de hacer logout
   } catch (error) {
     console.error('Error de logout:', error);
+    // Aquí podemos manejar otros casos de error si es necesario
+    toast.error("Error al cerrar sesión, por favor intenta nuevamente.");
   } finally {
-    localStorage.clear();
-    navigate('/'); // esto llevará a https://victor522m.github.io/frontend-menu-maker/#/
+    // Siempre limpiar el estado en el frontend (por ejemplo, userRole)
+    // Esto asegura que cualquier estado relacionado con la sesión se limpie
+    setUserRole(null);
+    console.log('Estado de usuario limpiado.');
   }
 };
 
