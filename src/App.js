@@ -1,12 +1,11 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState } from 'react';
 import Login from './components/Login';
 import OwnerDashboard from './components/OwnerDashboard';
 import EmployedDashboard from './components/EmployedDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
-// eslint-disable-next-line
 import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; // Importa los estilos de react-toastify
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   const [userRole, setUserRole] = useState(() => {
@@ -26,7 +25,7 @@ function App() {
 
   return (
     <>
-      <BrowserRouter>
+      <HashRouter>
         <Routes>
           <Route path="/" element={
             userRole ?
@@ -46,7 +45,8 @@ function App() {
           <Route path="/unauthorized" element={<div>Acceso no autorizado</div>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </BrowserRouter>
+      </HashRouter>
+
       <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -59,10 +59,8 @@ function App() {
         pauseOnHover
       />
     </>
-
   );
-
 }
 
-
 export default App;
+
