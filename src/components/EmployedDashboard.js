@@ -72,16 +72,22 @@ const navigate = useNavigate();
 
 const handleLogout = async () => {
   try {
+    // Llamada a la API para cerrar sesión
     await api.post('/api/logout');
     toast.success('Sesión cerrada correctamente');
   } catch (error) {
+    // Manejo de error si la API falla
     toast.error('Error al cerrar sesión');
     console.error('Logout error:', error);
   } finally {
+    // Limpiar los datos del usuario del almacenamiento local
     localStorage.clear();
-    onLogout(); // Esto hace que App.js reaccione y redirija a "/"
+    
+    // Redirigir al login
+    window.location.href = '/';  // Redirige explícitamente al login
   }
 };
+
 
 
   

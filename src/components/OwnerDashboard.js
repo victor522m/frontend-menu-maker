@@ -48,18 +48,22 @@ const navigate = useNavigate();
 
 const handleLogout = async () => {
   try {
-    await api.post('/api/logout', null, {
-      headers: {
-        'Authorization': localStorage.getItem('authToken')
-      }
-    });
+    // Llamada a la API para cerrar sesión
+    await api.post('/api/logout');
+    toast.success('Sesión cerrada correctamente');
   } catch (error) {
-    console.error('Error de logout:', error);
+    // Manejo de error si la API falla
+    toast.error('Error al cerrar sesión');
+    console.error('Logout error:', error);
   } finally {
+    // Limpiar los datos del usuario del almacenamiento local
     localStorage.clear();
-    navigate('/'); // esto llevará a https://victor522m.github.io/frontend-menu-maker/#/
+    
+    // Redirigir al login
+    window.location.href = '/';  // Redirige explícitamente al login
   }
 };
+
 
 
   // Funciones de actualización cuando se crean menús o platos

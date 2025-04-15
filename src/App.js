@@ -21,6 +21,7 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('userRole');
     setUserRole(null);
+    window.location.href = '/'; // Redirige al login después de cerrar sesión
   };
 
   return (
@@ -39,28 +40,37 @@ function InnerApp({ userRole, onLogin, onLogout }) {
 
   // Redirigir a login si no hay userRole al inicio
   useEffect(() => {
-    if (!userRole) {
-      window.location.href = '/';
+    if (!userRole && location.pathname !== '/') {
+      window.location.href = '/'; // Aseguramos redirigir a login si no hay userRole
     }
-  }, [userRole]);
+  }, [userRole, location]);
 
   return (
     <>
       <Routes key={location.pathname}>
-        <Route path="/" element={
-          userRole ?
-            <Navigate to="/dashboard" replace /> :
-            <Login onLogin={onLogin} />
-        } />
+        <Route
+          path="/"
+          element={
+            userRole ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <Login onLogin={onLogin} />
+            )
+          }
+        />
 
-        <Route path="/dashboard" element={
-          <ProtectedRoute allowedRoles={['OWNER', 'EMPLOYED']}>
-            {userRole === 'OWNER' ?
-              <OwnerDashboard onLogout={onLogout} /> :
-              <EmployedDashboard onLogout={onLogout} />
-            }
-          </ProtectedRoute>
-        } />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={['OWNER', 'EMPLOYED']}>
+              {userRole === 'OWNER' ? (
+                <OwnerDashboard onLogout={onLogout} />
+              ) : (
+                <EmployedDashboard onLogout={onLogout} />
+              )}
+            </ProtectedRoute>
+          }
+        />
 
         <Route path="/unauthorized" element={<div>Acceso no autorizado</div>} />
         <Route path="*" element={<Navigate to="/" replace />} />
