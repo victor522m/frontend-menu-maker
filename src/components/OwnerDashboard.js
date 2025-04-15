@@ -48,7 +48,7 @@ const navigate = useNavigate();
 
 const handleLogout = async () => {
   try {
-    await api.get('/api/logout', {
+    await api.post('/api/logout', {
       method: 'POST',
       headers: {
         'Authorization': localStorage.getItem('authToken')
