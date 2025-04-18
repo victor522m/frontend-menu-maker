@@ -71,7 +71,9 @@ function CreatePlate({ onPlateCreated }) {
   };
 
   return (
+    
     <form onSubmit={handleSubmit} className="plate-form" id="formulario-crear-plato">
+      
       <div className="form-group">
         <label>Tipo de Plato:</label>
         <select

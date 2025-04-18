@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 
 
 function ManagePlates() {
-  const [plates, setPlatos] = useState([]);
+  const [plates, setPlates] = useState([]);
   const [menus, setMenus] = useState([]);
 
   const [editingPlateId, setEditingPlateId] = useState(null);
@@ -22,7 +22,7 @@ function ManagePlates() {
     aptoCeliaco: false
   });
   const handlePlateCreated = (newPlate) => {
-    setPlatos((prevPlatos) => [...prevPlatos, newPlate]);
+    setPlates((prevPlatos) => [...prevPlatos, newPlate]);
   };
   const fetchMenusAndPlates = async () => {
     try {
@@ -34,7 +34,7 @@ function ManagePlates() {
       const plateResponse = await api.get('/api/platos', {
         headers: { 'Authorization': localStorage.getItem('authToken') }
       });
-      setPlatos(plateResponse.data);  // Establecer la lista de platos
+      setPlates(plateResponse.data);  // Establecer la lista de platos
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -46,14 +46,14 @@ function ManagePlates() {
           'Authorization': localStorage.getItem('authToken')
         }
       });
-      setPlatos(response.data); // Actualiza el estado con los datos obtenidos
+      setPlates(response.data); // Actualiza el estado con los datos obtenidos
     } catch (error) {
       console.error('Error obteniendo platos:', error);
     }
   };
 
   useEffect(() => {
-    fetchPlates();
+    fetchMenusAndPlates();
   }, []);
 
   const handleEditClick = (plate) => {
@@ -139,7 +139,7 @@ function ManagePlates() {
       });
 
       // Actualizamos el estado para reflejar los cambios en la UI sin necesidad de recargar
-      setPlatos(prevPlates => 
+      setPlates(prevPlates => 
         prevPlates.map(plate => 
           plate.id === plateId ? { ...plate, ...plateData } : plate
         )
@@ -162,7 +162,7 @@ function ManagePlates() {
       });
 
       // Eliminamos el plato del estado sin necesidad de recargar
-      setPlatos(prevPlates => prevPlates.filter(plate => plate.id !== plateId));
+      setPlates(prevPlates => prevPlates.filter(plate => plate.id !== plateId));
       await fetchMenusAndPlates(); // Actualiza platos y menús
 
       toast.success('Plato eliminado con éxito');
