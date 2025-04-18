@@ -54,7 +54,7 @@ function ManageMenus() {
 
   const handleAddPlateToMenu = async (menuId, plateId) => {
     if (!plateId) return;
-
+  
     try {
       // Agregar plato al menú
       await api.post(`/api/menus/${menuId}/platos`, [plateId], {
@@ -64,52 +64,59 @@ function ManageMenus() {
         }
       });
       toast.success('Plato agregado al menú');
-
+  
       // Actualizar la lista local de platos para no volver a agregar el plato
       const updatedPlates = platos.filter(plate => plate.id !== plateId);
       setPlatos(updatedPlates);
-
-      // Actualizamos los platos del menú
-      const updatedMenuPlates = await api.get(`/api/menus/${menuId}/platos`, {
+  
+      // Obtener el menú actualizado con los platos y precios actualizados
+      const updatedMenu = await api.get(`/api/menus/${menuId}`, {
         headers: { 'Authorization': localStorage.getItem('authToken') }
       });
-      setMenuPlates(updatedMenuPlates.data);
-
-      // También actualizamos los platos en el menú de la lista de menús
+  
+      // Actualizamos el estado de menús con el menú actualizado
       setMenus(prevMenus =>
         prevMenus.map(menu =>
-          menu.id === menuId ? { ...menu, platos: updatedMenuPlates.data } : menu
+          menu.id === menuId ? { ...updatedMenu.data } : menu
         )
       );
+  
+      // Actualizamos la lista de platos del menú
+      setMenuPlates(updatedMenu.data.platos);
+  
     } catch (error) {
       console.error('Error adding plate:', error);
       toast.error('Error al agregar el plato al menú');
     }
   };
-
+ 
   const handleRemovePlateFromMenu = async (menuId, plateId) => {
     try {
+      // Eliminar plato del menú
       await api.delete(`/api/menus/${menuId}/platos/${plateId}`, {
         headers: { 'Authorization': localStorage.getItem('authToken') }
       });
       toast.success('Plato eliminado del menú');
-
+  
       // Restauramos el plato a la lista global de platos
       const removedPlate = menuPlates.find(plate => plate.id === plateId);
       setPlatos(prevPlates => [...prevPlates, removedPlate]);
-
-      // Actualizamos la lista de platos del menú
-      const updatedMenuPlates = await api.get(`/api/menus/${menuId}/platos`, {
+  
+      // Obtener el menú actualizado con los platos y precios actualizados
+      const updatedMenu = await api.get(`/api/menus/${menuId}`, {
         headers: { 'Authorization': localStorage.getItem('authToken') }
       });
-      setMenuPlates(updatedMenuPlates.data);
-
-      // También actualizamos los platos en el menú de la lista de menús
+  
+      // Actualizamos el estado de menús con el menú actualizado
       setMenus(prevMenus =>
         prevMenus.map(menu =>
-          menu.id === menuId ? { ...menu, platos: updatedMenuPlates.data } : menu
+          menu.id === menuId ? { ...updatedMenu.data } : menu
         )
       );
+  
+      // Actualizamos la lista de platos del menú
+      setMenuPlates(updatedMenu.data.platos);
+  
     } catch (error) {
       console.error('Error removing plate:', error);
       toast.error('Error al eliminar el plato del menú');
