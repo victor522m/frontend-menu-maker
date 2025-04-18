@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { toast } from 'react-toastify';
 import CreateMenu from './CreateMenu';
+import CreatePlate from './CreatePlate'; // Ajusta la ruta si está en otra carpeta
+
 
 function ManageMenus() {
   const [menus, setMenus] = useState([]);

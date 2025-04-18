@@ -3,8 +3,11 @@ import api from '../services/api.js';
 import CreatePlate from './CreatePlate';
 import { toast } from 'react-toastify';
 
+
 function ManagePlates() {
   const [plates, setPlatos] = useState([]);
+  const [menus, setMenus] = useState([]);
+
   const [editingPlateId, setEditingPlateId] = useState(null);
   const [editFormData, setEditFormData] = useState({
     nombre: '',
