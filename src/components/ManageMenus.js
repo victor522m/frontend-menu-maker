@@ -13,25 +13,24 @@ function ManageMenus() {
   const [menuPlates, setMenuPlates] = useState([]);
   const [selectedPlate, setSelectedPlate] = useState(null);
   const handlePlateCreated = (newPlate) => {
-    setPlatos((prevPlates) => [...prevPlates, newPlate]);
+    fetchMenusAndPlates();
+  };
+  const fetchMenusAndPlates = async () => {
+    try {
+      const menuResponse = await api.get('/api/menus', {
+        headers: { 'Authorization': localStorage.getItem('authToken') }
+      });
+      setMenus(menuResponse.data);  // Establecer la lista de menús
+
+      const plateResponse = await api.get('/api/platos', {
+        headers: { 'Authorization': localStorage.getItem('authToken') }
+      });
+      setPlatos(plateResponse.data);  // Establecer la lista de platos
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
   };
   useEffect(() => {
-    const fetchMenusAndPlates = async () => {
-      try {
-        const menuResponse = await api.get('/api/menus', {
-          headers: { 'Authorization': localStorage.getItem('authToken') }
-        });
-        setMenus(menuResponse.data);  // Establecer la lista de menús
-  
-        const plateResponse = await api.get('/api/platos', {
-          headers: { 'Authorization': localStorage.getItem('authToken') }
-        });
-        setPlatos(plateResponse.data);  // Establecer la lista de platos
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-  
     fetchMenusAndPlates();
   }, []); // Solo ejecutar una vez al cargar el componente
   
