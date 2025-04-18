@@ -32,8 +32,8 @@ function ManageMenus() {
   }, []); // Solo ejecutar una vez al cargar el componente
   
   // Función que se pasa al componente CreateMenu
-  const handleMenuCreated = (menuList) => {
-    setMenus((menuList) );  // Añadir el nuevo menú a la lista
+  const handleMenuCreated = (newMenu) => {
+    setMenus((prevMenus) => [...prevMenus, newMenu]);
   };
 
   // Select a menu to view its plates

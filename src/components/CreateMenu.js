@@ -41,12 +41,8 @@ function CreateMenu({ onMenuCreated }) {
         // });
 
         if (onMenuCreated) {
-          const nuevosMenus = await api.get('/api/menus', {
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-            }
-          });
-          onMenuCreated(nuevosMenus.data); // Se lo mandamos al padre
+          
+          onMenuCreated(response.data); // Se lo mandamos al padre
         }
       }
 
