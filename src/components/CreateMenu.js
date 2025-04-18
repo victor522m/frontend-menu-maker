@@ -40,8 +40,7 @@ function CreateMenu({ onMenuCreated }) {
         //   }
         // });
 
-        if (onMenuCreated) {
-          
+        if (onMenuCreated) { 
           onMenuCreated(response.data); // Se lo mandamos al padre
         }
       }

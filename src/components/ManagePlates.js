@@ -21,7 +21,21 @@ function ManagePlates() {
   const handlePlateCreated = (newPlate) => {
     setPlatos((prevPlatos) => [...prevPlatos, newPlate]);
   };
-  
+  const fetchMenusAndPlates = async () => {
+    try {
+      const menuResponse = await api.get('/api/menus', {
+        headers: { 'Authorization': localStorage.getItem('authToken') }
+      });
+      setMenus(menuResponse.data);  // Establecer la lista de menús
+
+      const plateResponse = await api.get('/api/platos', {
+        headers: { 'Authorization': localStorage.getItem('authToken') }
+      });
+      setPlatos(plateResponse.data);  // Establecer la lista de platos
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
   const fetchPlates = async () => {
     try {
       const response = await api.get('/api/platos', {
@@ -127,7 +141,7 @@ function ManagePlates() {
           plate.id === plateId ? { ...plate, ...plateData } : plate
         )
       );
-
+      await fetchMenusAndPlates(); // Actualiza platos y menús
       toast.success('Plato actualizado con éxito');
       setEditingPlateId(null); // Salimos del modo de edición
     } catch (error) {
@@ -146,6 +160,7 @@ function ManagePlates() {
 
       // Eliminamos el plato del estado sin necesidad de recargar
       setPlatos(prevPlates => prevPlates.filter(plate => plate.id !== plateId));
+      await fetchMenusAndPlates(); // Actualiza platos y menús
 
       toast.success('Plato eliminado con éxito');
     } catch (error) {
