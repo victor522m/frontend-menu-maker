@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/frontend-menu-maker/static/css/main.a1c332ec.css",
-    "main.js": "/frontend-menu-maker/static/js/main.9e139f27.js",
+    "main.js": "/frontend-menu-maker/static/js/main.d136ebaa.js",
     "index.html": "/frontend-menu-maker/index.html",
     "main.a1c332ec.css.map": "/frontend-menu-maker/static/css/main.a1c332ec.css.map",
-    "main.9e139f27.js.map": "/frontend-menu-maker/static/js/main.9e139f27.js.map"
+    "main.d136ebaa.js.map": "/frontend-menu-maker/static/js/main.d136ebaa.js.map"
   },
   "entrypoints": [
     "static/css/main.a1c332ec.css",
-    "static/js/main.9e139f27.js"
+    "static/js/main.d136ebaa.js"
   ]
 }
