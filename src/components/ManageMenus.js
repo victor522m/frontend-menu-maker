@@ -232,7 +232,7 @@ function ManageMenus() {
                 <button onClick={handleUpdateMenuName} disabled={!newMenuName.trim()}>
                   Actualizar nombre
                 </button>
-                <CreatePlate onPlateCreated={handlePlateCreated} />
+                
                 <select value={selectedPlate?.id || ''} onChange={(e) => setSelectedPlate(platos.find(p => p.id === parseInt(e.target.value)))}>
                   <option value="">Seleccione un plato</option>
                   {platos.map(plate => (
