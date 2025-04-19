@@ -7,7 +7,19 @@ import { toast } from 'react-toastify';
 function ManagePlates() {
   const [plates, setPlates] = useState([]);
   const [menus, setMenus] = useState([]);
-
+  const initialPlate = {
+    nombre: '',
+    descripcion: '',
+    precio: 0,
+    tipo_plato: 'PRIMEROS',
+    esVegetariano: false,
+    tiempoPreparacion: 10,
+    tipoCarne: '',
+    guarnicion: '',
+    tipoPostre: '',
+    aptoCeliaco: false
+  };
+  
   const [editingPlateId, setEditingPlateId] = useState(null);
   const [editFormData, setEditFormData] = useState({
     nombre: '',

@@ -62,7 +62,6 @@ function CreatePlate({ onPlateCreated }) {
 
         if (onPlateCreated) {
           onPlateCreated(response.data); // Notificamos al padre
-          fetchMenusAndPlates(); // Actualizar lista completa
         }
       }
     } catch (error) {
