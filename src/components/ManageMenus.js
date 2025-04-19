@@ -12,6 +12,9 @@ function ManageMenus() {
   const [newMenuName, setNewMenuName] = useState('');
   const [menuPlates, setMenuPlates] = useState([]);
   const [selectedPlate, setSelectedPlate] = useState(null);
+  const authHeader = {
+    'Authorization': localStorage.getItem('authToken')
+  };
   const handlePlateCreated = (newPlate) => {
     fetchMenusAndPlates();
   };
