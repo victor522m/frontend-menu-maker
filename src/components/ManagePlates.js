@@ -125,46 +125,76 @@ function ManagePlates() {
   const handleUpdatePlate = async (e, plateId) => {
     e.preventDefault();
     try {
-      const plateData = {
+      // 1. Crear objeto base con campos comunes
+      const baseData = {
         nombre: editFormData.nombre,
         descripcion: editFormData.descripcion,
         precio: parseFloat(editFormData.precio),
-        tipo_plato: editFormData.tipo_plato,
-        ...(editFormData.tipo_plato === 'PRIMEROS' && {
-          esVegetariano: editFormData.esVegetariano,
-          tiempoPreparacion: parseInt(editFormData.tiempoPreparacion)
-        }),
-        ...(editFormData.tipo_plato === 'SEGUNDOS' && {
-          tipoCarne: editFormData.tipoCarne,
-          guarnicion: editFormData.guarnicion
-        }),
-        ...(editFormData.tipo_plato === 'POSTRE' && {
-          tipoPostre: editFormData.tipoPostre,
-          aptoCeliaco: editFormData.aptoCeliaco
-        })
+        tipo_plato: editFormData.tipo_plato
       };
-
-      await api.put(`/api/platos/${plateId}`, plateData, {
+  
+      // 2. Limpiar campos específicos según tipo
+      let specificData = {};
+      switch(editFormData.tipo_plato) {
+        case 'PRIMEROS':
+          specificData = {
+            esVegetariano: editFormData.esVegetariano,
+            tiempoPreparacion: parseInt(editFormData.tiempoPreparacion),
+            tipoCarne: null,  // Limpiar campos de otros tipos
+            guarnicion: null,
+            tipoPostre: null,
+            aptoCeliaco: null
+          };
+          break;
+        case 'SEGUNDOS':
+          specificData = {
+            tipoCarne: editFormData.tipoCarne,
+            guarnicion: editFormData.guarnicion,
+            esVegetariano: null,
+            tiempoPreparacion: null,
+            tipoPostre: null,
+            aptoCeliaco: null
+          };
+          break;
+        case 'POSTRE':
+          specificData = {
+            tipoPostre: editFormData.tipoPostre,
+            aptoCeliaco: editFormData.aptoCeliaco,
+            esVegetariano: null,
+            tiempoPreparacion: null,
+            tipoCarne: null,
+            guarnicion: null
+          };
+          break;
+        default:
+          specificData = {};
+      }
+  
+      // 3. Combinar datos
+      const plateData = { ...baseData, ...specificData };
+  
+      // 4. Enviar petición y actualizar estado
+      const response = await api.put(`/api/platos/${plateId}`, plateData, {
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': localStorage.getItem('authToken')
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          'Content-Type': 'application/json'
         }
       });
-
-      // Actualizamos el estado para reflejar los cambios en la UI sin necesidad de recargar
-      setPlates(prevPlates => 
-        prevPlates.map(plate => 
-          plate.id === plateId ? { ...plate, ...plateData } : plate
-        )
+  
+      // 5. Actualizar estado con respuesta del servidor
+      setPlates(prev => 
+        prev.map(p => p.id === plateId ? response.data : p)
       );
-      await fetchMenusAndPlates(); // Actualiza platos y menús
+  
       toast.success('Plato actualizado con éxito');
-      setEditingPlateId(null); // Salimos del modo de edición
+      setEditingPlateId(null);
+      
     } catch (error) {
       console.error('Error actualizando plato:', error);
-      toast.error(error.message);
+      toast.error(error.response?.data?.message || 'Error al actualizar');
     }
   };
+  
 
   const handleDeletePlate = async (plateId) => {
     try {
