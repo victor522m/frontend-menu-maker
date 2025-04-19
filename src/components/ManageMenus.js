@@ -32,7 +32,7 @@ function ManageMenus() {
   };
   useEffect(() => {
     fetchMenusAndPlates();
-  }, []); // Solo ejecutar una vez al cargar el componente
+  }, [platos.length]); // Solo ejecutar una vez al cargar el componente
   
   // Función que se pasa al componente CreateMenu
   const handleMenuCreated = (newMenu) => {
@@ -166,28 +166,43 @@ function ManageMenus() {
   // Handle PDF generation
   const handleGeneratePDF = async (menuId) => {
     try {
-      const porcentajeIva = 10; // Puedes ajustar este valor según tus necesidades
-      const url = `/api/menus/pdf/${menuId}/${porcentajeIva}`;
+      const porcentajeIva = 10;
+      const timestamp = Date.now(); // Cache buster
+      const url = `/api/menus/pdf/${menuId}/${porcentajeIva}?timestamp=${timestamp}`;
   
       const response = await api.get(url, {
         headers: {
           'Authorization': localStorage.getItem('authToken'),
+          'Cache-Control': 'no-cache' // Forzar actualización
         },
-        responseType: 'blob', // Importante para recibir archivos binarios
+        responseType: 'blob'
       });
   
-      // Crear un enlace para descargar el PDF
-      const pdfUrl = window.URL.createObjectURL(response.data);
+      // Crear Blob con tipo explícito
+      const pdfBlob = new Blob([response.data], { 
+        type: response.headers['content-type'] || 'application/pdf' 
+      });
+  
+      const pdfUrl = window.URL.createObjectURL(pdfBlob);
       const link = document.createElement('a');
       link.href = pdfUrl;
-      link.download = `menu_${menuId}.pdf`;
+      link.download = `menu_${menuId}_${new Date().toISOString().split('T')[0]}.pdf`;
+      
+      document.body.appendChild(link);
       link.click();
-      window.URL.revokeObjectURL(pdfUrl); // Liberar memoria
+      
+      // Limpieza asíncrona
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(pdfUrl);
+      }, 100);
   
     } catch (error) {
       console.error('Error al generar PDF:', error);
+      toast.error('Error al generar el PDF. Verifique la conexión');
     }
   };
+  
 
   return (
     <div>

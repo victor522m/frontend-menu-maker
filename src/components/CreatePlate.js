@@ -58,10 +58,11 @@ function CreatePlate({ onPlateCreated }) {
 
       if (response.status === 201) {
         toast.success('Plato creado con éxito');
-        setPlate({ nombre: '', descripcion: '', precio: '' });
+        setPlate(initialPlate);
 
         if (onPlateCreated) {
           onPlateCreated(response.data); // Notificamos al padre
+          fetchMenusAndPlates(); // Actualizar lista completa
         }
       }
     } catch (error) {

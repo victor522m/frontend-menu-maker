@@ -90,16 +90,14 @@ function ManagePlates() {
 
   const handleFormChange = (e) => {
     const { name, value, type, checked } = e.target;
+    
     if (name === "tipo_plato") {
       setEditFormData(prev => ({
-        ...prev,
-        [name]: value,
-        esVegetariano: false,
-        tiempoPreparacion: 10,
-        tipoCarne: "",
-        guarnicion: "",
-        tipoPostre: "",
-        aptoCeliaco: false
+        ...initialPlate, // Reset completo desde la estructura inicial
+        nombre: prev.nombre, // Mantenemos valores existentes
+        descripcion: prev.descripcion,
+        precio: prev.precio,
+        tipo_plato: value, // Nuevo valor seleccionado
       }));
     } else {
       setEditFormData(prev => ({
@@ -108,6 +106,7 @@ function ManagePlates() {
       }));
     }
   };
+  
 
   const handleUpdatePlate = async (e, plateId) => {
     e.preventDefault();
