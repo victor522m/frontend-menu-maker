@@ -188,7 +188,7 @@ function ManagePlates() {
   
       toast.success('Plato actualizado con éxito');
       console.log('Datos enviados:', plateData);
-      console.log('Respuesta del servidor:', error.response?.data);
+      console.log('Respuesta del servidor:', response.data);
       setEditingPlateId(null);
       
     } catch (error) {
