@@ -41,30 +41,43 @@ function EmployedDashboard() {
     fetchMenus();
   }, []);
 
-  const handleGeneratePDF = async (menuId) => {
-    try {
-      const porcentajeIva = 10; // Puedes ajustar este valor según tus necesidades
-      const url = `/api/menus/pdf/${menuId}/${porcentajeIva}`;
-  
-      const response = await api.get(url, {
-        headers: {
-          'Authorization': localStorage.getItem('authToken'),
-        },
-        responseType: 'blob', // Importante para recibir archivos binarios
-      });
-  
-      // Crear un enlace para descargar el PDF
-      const pdfUrl = window.URL.createObjectURL(response.data);
-      const link = document.createElement('a');
-      link.href = pdfUrl;
-      link.download = `menu_${menuId}.pdf`;
-      link.click();
-      window.URL.revokeObjectURL(pdfUrl); // Liberar memoria
-  
-    } catch (error) {
-      console.error('Error al generar PDF:', error);
-    }
-  };
+  // Línea 29: Mejora en generación de PDF
+const handleGeneratePDF = async (menuId) => {
+  try {
+    const cacheBuster = `?ts=${Date.now()}`;
+    const response = await api.get(`/api/menus/pdf/${menuId}/10${cacheBuster}`, {
+      headers: {
+        'Authorization': localStorage.getItem('authToken'),
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      },
+      responseType: 'blob'
+    });
+
+    const disposition = response.headers['content-disposition'];
+    const filename = disposition 
+      ? disposition.split('filename=')[1].replace(/"/g, '')
+      : `menu_${menuId}.pdf`;
+
+    const blob = new Blob([response.data], { 
+      type: response.headers['content-type'] || 'application/pdf' 
+    });
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(() => {
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+    }, 100);
+  } catch (error) {
+    console.error('Error generando PDF:', error);
+    toast.error(`Error: ${error.response?.data?.message || 'Verifique conexión'}`);
+  }
+};
+
 
 
 

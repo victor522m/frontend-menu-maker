@@ -105,11 +105,13 @@ function ManagePlates() {
     
     if (name === "tipo_plato") {
       setEditFormData(prev => ({
-        ...initialPlate, // Reset completo desde la estructura inicial
-        nombre: prev.nombre, // Mantenemos valores existentes
+        ...initialPlate, // Reset completo
+        nombre: prev.nombre,
         descripcion: prev.descripcion,
         precio: prev.precio,
-        tipo_plato: value, // Nuevo valor seleccionado
+        tipo_plato: value,
+        [name === 'PRIMEROS' ? 'tiempoPreparacion' : 'tipoCarne']: 
+          name === 'PRIMEROS' ? 10 : ''
       }));
     } else {
       setEditFormData(prev => ({

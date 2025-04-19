@@ -31,9 +31,39 @@ function ManageMenus() {
     }
   };
   useEffect(() => {
-    fetchMenusAndPlates();
-  }, [platos.length]); // Solo ejecutar una vez al cargar el componente
+    let isMounted = true;
+    const controller = new AbortController();
   
+    const fetchData = async () => {
+      try {
+        const [menusRes, platesRes] = await Promise.all([
+          api.get('/api/menus', { 
+            headers: authHeader,
+            signal: controller.signal 
+          }),
+          api.get('/api/platos', { 
+            headers: authHeader,
+            signal: controller.signal 
+          })
+        ]);
+        
+        if(isMounted) {
+          setMenus(menusRes.data);
+          setPlatos(platesRes.data);
+        }
+      } catch (error) {
+        if(!error.name === 'AbortError') {
+          toast.error('Error sincronizando datos');
+        }
+      }
+    };
+    
+    fetchData();
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, []); 
   // Función que se pasa al componente CreateMenu
   const handleMenuCreated = (newMenu) => {
     setMenus((prevMenus) => [...prevMenus, newMenu]);
